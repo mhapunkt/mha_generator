@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #F2F4F8; }
+  a { color: #003D6A; }
+  a:hover { color: #B4531F; }
+  input, select, textarea { font-family: 'IBM Plex Sans', Helvetica, sans-serif; font-size: 14px; color: #002340; background: #FFFFFF; border: 1px solid #C7CEE4; padding: 9px 10px; width: 100%; border-radius: 0; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid #B4531F; outline-offset: 1px; border-color: #5A63A0; }
+  textarea { line-height: 1.55; resize: vertical; }
+  button { font-family: 'IBM Plex Sans', Helvetica, sans-serif; cursor: pointer; border-radius: 0; }
+  button:focus-visible { outline: 2px solid #B4531F; outline-offset: 2px; }
+  @page { size: A4; margin: 0; }
+  @media print {
+    body { background: #FFFFFF; }
+    .no-print { display: none !important; }
+    .sheet { box-shadow: none !important; margin: 0 !important; border: 0 !important; }
+    .sheet-wrap { padding: 0 !important; background: #FFFFFF !important; }
+  }
+</style>
+</helmet>
+
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#002340"/><rect x="30" y="30" width="40" height="40" fill="none" stroke="#9AA2D2" stroke-width="1.6"/><text x="50" y="52" text-anchor="middle" font-family="Helvetica, sans-serif" font-weight="700" font-size="12" fill="#FFFFFF">IA24</text><line x1="38" y1="58" x2="62" y2="54.6" stroke="#B4531F" stroke-width="1.6"/></svg></template>
+
+<div style="font-family:'IBM Plex Sans', Helvetica, sans-serif; color:#002340; min-height:100vh; display:flex; flex-direction:column">
+
+  <div class="no-print" style="background:#002340; padding:18px 32px; display:flex; align-items:center; justify-content:space-between; gap:32px">
+    <div style="display:flex; align-items:center; gap:16px">
+      <div style="width:44px; height:44px; border:1.5px solid #9AA2D2; position:relative; flex:none; display:flex; align-items:center; justify-content:center">
+        <div style="font-family:'Archivo', Helvetica, sans-serif; font-weight:700; letter-spacing:-0.01em; font-size:13px; color:#FFFFFF; line-height:1; padding-bottom:4px">IA24</div>
+        <div style="position:absolute; left:8px; bottom:10px; width:27px; height:1px; background:#B4531F; transform:rotate(-8deg); transform-origin:left center"></div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:3px">
+        <div style="font-size:15px; font-weight:600; color:#FFFFFF; letter-spacing:0.02em">Vorlagengenerator</div>
+        <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#9AA2D2">Insolvenzanwalt 24 e.&nbsp;V.</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center">
+      <button type="button" onClick="{{ onReset }}" style="background:transparent; color:#C7CEE4; border:1px solid #3E5C8A; padding:9px 16px; font-size:13px">Beispieldaten laden</button>
+      <div style="font-size:11px; color:#5A78A8; letter-spacing:0.06em">{{ saveHint }}</div>
+    </div>
+  </div>
+
+  <div class="no-print" style="background:#FFFFFF; border-bottom:1px solid #D7DCE6; padding:0 32px; display:flex; gap:2px; overflow-x:auto">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="7">
+      <button type="button" data-tab="{{ t.id }}" onClick="{{ onTab }}" style="{{ t.style }}">{{ t.label }}</button>
+    </sc-for>
+  </div>
+
+  <div style="display:flex; align-items:stretch; flex:1; min-height:0">
+
+    <div class="no-print" style="width:400px; flex:none; background:#FFFFFF; border-right:1px solid #D7DCE6; padding:26px 28px 60px; display:flex; flex-direction:column; gap:22px; overflow-y:auto">
+
+      <div style="display:flex; flex-direction:column; gap:6px">
+        <div style="font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:#5A63A0; font-weight:600">{{ panelKicker }}</div>
+        <div style="font-family:'Archivo', Helvetica, sans-serif; letter-spacing:-0.01em; font-size:24px; font-weight:600; line-height:1.15">{{ panelTitle }}</div>
+        <div style="font-size:13px; line-height:1.55; color:#33415C">{{ panelNote }}</div>
+      </div>
+
+      <sc-if value="{{ hasEvent }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; gap:14px; border-top:1px solid #E4E8EF; padding-top:20px">
+        <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#5A63A0; font-weight:600">Veranstaltung</div>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Dachmarke</span>
+          <input name="dachmarke" value="{{ f.dachmarke }}" onInput="{{ onField }}" readOnly="{{ true }}" style="background:#F4F6FA; color:#5A63A0">
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Veranstaltungsformat</span>
+          <select name="eventFormat" value="{{ f.eventFormat }}" onChange="{{ onField }}">
+            <option value="Frühjahrstagung">Frühjahrstagung</option>
+            <option value="Herbsttagung">Herbsttagung</option>
+            <option value="Fachkonferenz">Fachkonferenz</option>
+            <option value="IA24 Online">IA24 Online</option>
+            <option value="IA24 Spezial">IA24 Spezial</option>
+            <option value="Mitgliederversammlung">Mitgliederversammlung</option>
+          </select>
+        </label>
+        <div style="display:flex; gap:10px">
+          <label style="display:flex; flex-direction:column; gap:5px; flex:2">
+            <span style="font-size:12px; color:#5A63A0">Titel oder Ort</span>
+            <input name="titel" value="{{ f.titel }}" onInput="{{ onField }}">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Jahr</span>
+            <input name="jahr" value="{{ f.jahr }}" onInput="{{ onField }}" inputMode="numeric">
+          </label>
+        </div>
+        <div style="display:flex; gap:10px">
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Beginn</span>
+            <input name="von" value="{{ f.von }}" onInput="{{ onField }}" type="date">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Ende</span>
+            <input name="bis" value="{{ f.bis }}" onInput="{{ onField }}" type="date">
+          </label>
+        </div>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Datumszeile manuell überschreiben</span>
+          <input name="datumManuell" value="{{ f.datumManuell }}" onInput="{{ onField }}" placeholder="{{ datumAuto }}">
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Statusmarker</span>
+          <select name="status" value="{{ f.status }}" onChange="{{ onField }}">
+            <option value="SAVE THE DATE">Save the Date</option>
+            <option value="ANKÜNDIGUNG">Veranstaltungsankündigung</option>
+            <option value="ANMELDUNG GEÖFFNET">Anmeldung geöffnet</option>
+            <option value="PROGRAMM ONLINE">Programm veröffentlicht</option>
+            <option value="ERINNERUNG">Erinnerung</option>
+            <option value="WENIGE PLÄTZE">Nur noch wenige Plätze</option>
+            <option value="AUSGEBUCHT">Ausgebucht</option>
+            <option value="RÜCKBLICK">Rückblick</option>
+            <option value="">ohne Marker</option>
+          </select>
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Farbvariante</span>
+          <select name="variante" value="{{ f.variante }}" onChange="{{ onField }}">
+            <option value="fruehjahr">Frühjahr · Grün</option>
+            <option value="herbst">Herbst · Kupfer</option>
+            <option value="neutral">Ganzjährig · Lavendel</option>
+          </select>
+        </label>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isTiles }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; gap:14px; border-top:1px solid #E4E8EF; padding-top:20px">
+        <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#5A63A0; font-weight:600">Kachel</div>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Ausgabeformat für die große Vorschau</span>
+          <select name="ausgabe" value="{{ f.ausgabe }}" onChange="{{ onField }}">
+            <option value="1080x1080">1080 × 1080 · LinkedIn quadratisch</option>
+            <option value="1200x627">1200 × 627 · LinkedIn quer</option>
+            <option value="1080x1350">1080 × 1350 · Hochformat</option>
+            <option value="1080x1920">1080 × 1920 · Story</option>
+          </select>
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Grundfläche</span>
+          <select name="grund" value="{{ f.grund }}" onChange="{{ onField }}">
+            <option value="dunkel">Navy · dunkel</option>
+            <option value="hell">Weiß · hell</option>
+          </select>
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Zusatzinformation im Fuß</span>
+          <input name="zusatz" value="{{ f.zusatz }}" onInput="{{ onField }}" placeholder="insolvenzanwalt24.de">
+        </label>
+        <div style="font-size:12px; line-height:1.55; color:#5A63A0; background:#F4F6FA; padding:12px 14px">Geschützt und nicht einstellbar: Signet, Winkel, Schriftgrade, Farbpalette und Abstände.</div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isSocial }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; gap:14px; border-top:1px solid #E4E8EF; padding-top:20px">
+        <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#5A63A0; font-weight:600">Kacheltyp</div>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Inhalt</span>
+          <select name="sTyp" value="{{ f.sTyp }}" onChange="{{ onSocialTyp }}">
+            <sc-for list="{{ socialTypes }}" as="s" hint-placeholder-count="10">
+              <option value="{{ s.id }}">{{ s.label }}</option>
+            </sc-for>
+          </select>
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Rubrik über der Aussage</span>
+          <input name="sKicker" value="{{ f.sKicker }}" onInput="{{ onField }}">
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Aussage · Kernzeile</span>
+          <textarea name="sBig" value="{{ f.sBig }}" onInput="{{ onField }}" rows="{{ 3 }}"></textarea>
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Erläuterung</span>
+          <textarea name="sSub" value="{{ f.sSub }}" onInput="{{ onField }}" rows="{{ 3 }}"></textarea>
+        </label>
+        <div style="display:flex; gap:10px">
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Fuß links</span>
+            <input name="sFl" value="{{ f.sFl }}" onInput="{{ onField }}">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Fuß rechts</span>
+            <input name="sFr" value="{{ f.sFr }}" onInput="{{ onField }}">
+          </label>
+        </div>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Bild</span>
+          <select name="sBildMode" value="{{ f.sBildMode }}" onChange="{{ onField }}">
+            <option value="ohne">Ohne Bild · rein typografisch</option>
+            <option value="oben">Bildband oben</option>
+            <option value="flaeche">Bild als Fläche mit Navy-Schleier</option>
+          </select>
+        </label>
+        <div onDrop="{{ onDrop }}" onDragOver="{{ onDragOver }}" style="border:1px dashed #9AA2D2; background:#F4F6FA; padding:16px; display:flex; flex-direction:column; gap:9px; align-items:flex-start">
+          <div style="font-size:12px; color:#5A63A0; line-height:1.5">Bild hierher ziehen — oder auswählen. {{ bildName }}</div>
+          <input type="file" accept="image/*" onChange="{{ onPick }}" style="font-size:12px; padding:0; border:0; background:transparent">
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; background:#F4F6FA; padding:14px; border:1px solid #E4E8EF">
+          <div style="font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:#5A63A0; font-weight:600">Karussell</div>
+          <div style="font-size:12px; line-height:1.5; color:#5A63A0">Kachel 01 ist die Titelkachel oben. Darunter je Zeile eine Beitragskachel, am Ende die Fazitkachel.</div>
+          <label style="display:flex; flex-direction:column; gap:5px">
+            <span style="font-size:12px; color:#5A63A0">Beitragskacheln — je Zeile: Überschrift | Text</span>
+            <textarea name="sSerie" value="{{ f.sSerie }}" onInput="{{ onField }}" rows="{{ 7 }}" placeholder="Antragspflicht | Drei Wochen ab Zahlungsunfähigkeit."></textarea>
+          </label>
+          <div style="display:flex; gap:8px">
+            <label style="display:flex; flex-direction:column; gap:5px; width:120px">
+              <span style="font-size:12px; color:#5A63A0">Schlusskachel</span>
+              <input name="sFazitTitel" value="{{ f.sFazitTitel }}" onInput="{{ onField }}">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+              <span style="font-size:12px; color:#5A63A0">Fazit — leer lassen, um sie zu entfernen</span>
+              <textarea name="sFazit" value="{{ f.sFazit }}" onInput="{{ onField }}" rows="{{ 3 }}"></textarea>
+            </label>
+          </div>
+        </div>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Ausgabeformat für die große Vorschau</span>
+          <select name="ausgabe" value="{{ f.ausgabe }}" onChange="{{ onField }}">
+            <option value="1080x1080">1080 × 1080 · quadratisch</option>
+            <option value="1200x627">1200 × 627 · quer</option>
+            <option value="1080x1350">1080 × 1350 · Hochformat</option>
+            <option value="1080x1920">1080 × 1920 · Story</option>
+          </select>
+        </label>
+        <div style="display:flex; gap:10px">
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Grundfläche</span>
+            <select name="grund" value="{{ f.grund }}" onChange="{{ onField }}">
+              <option value="dunkel">Navy · dunkel</option>
+              <option value="hell">Weiß · hell</option>
+            </select>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Akzent</span>
+            <select name="variante" value="{{ f.variante }}" onChange="{{ onField }}">
+              <option value="herbst">Kupfer</option>
+              <option value="fruehjahr">Grün</option>
+              <option value="neutral">Lavendel</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isMail }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; gap:14px; border-top:1px solid #E4E8EF; padding-top:20px">
+        <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#5A63A0; font-weight:600">Mail</div>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Mailtyp</span>
+          <select name="mailTyp" value="{{ f.mailTyp }}" onChange="{{ onField }}">
+            <option value="std">Save the Date</option>
+            <option value="einladung">Einladung mit Programm</option>
+            <option value="newsletter">Mitgliedernewsletter</option>
+            <option value="rundmail">Rundmail des Vorstands</option>
+          </select>
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Betreff</span>
+          <input name="mailBetreff" value="{{ f.mailBetreff }}" onInput="{{ onField }}" placeholder="{{ betreffAuto }}">
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Anschreiben</span>
+          <textarea name="mailText" value="{{ f.mailText }}" onInput="{{ onField }}" rows="{{ 5 }}"></textarea>
+        </label>
+
+        <sc-if value="{{ isNewsletter }}" hint-placeholder-val="{{ true }}">
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Ausgabe</span>
+          <input name="nlAusgabe" value="{{ f.nlAusgabe }}" onInput="{{ onField }}">
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Beiträge — je Zeile: Rubrik | Titel | Text</span>
+          <textarea name="nlBeitraege" value="{{ f.nlBeitraege }}" onInput="{{ onField }}" rows="{{ 6 }}"></textarea>
+        </label>
+        </sc-if>
+
+        <sc-if value="{{ isEinladung }}" hint-placeholder-val="{{ true }}">
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Programm — je Zeile: Tag | Inhalt</span>
+          <textarea name="programm" value="{{ f.programm }}" onInput="{{ onField }}" rows="{{ 4 }}"></textarea>
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Anmeldung bis · Beitrag</span>
+          <input name="anmeldung" value="{{ f.anmeldung }}" onInput="{{ onField }}">
+        </label>
+        <div style="display:flex; flex-direction:column; gap:10px; background:#F4F6FA; padding:14px; border:1px solid #E4E8EF">
+          <div style="font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:#5A63A0; font-weight:600">Zimmerkontingent</div>
+          <input name="hotelName" value="{{ f.hotelName }}" onInput="{{ onField }}" placeholder="Hotel">
+          <div style="display:flex; gap:8px">
+            <input name="hotelAnzahl" value="{{ f.hotelAnzahl }}" onInput="{{ onField }}" placeholder="60 Zimmer">
+            <input name="hotelPreis" value="{{ f.hotelPreis }}" onInput="{{ onField }}" placeholder="139 €">
+          </div>
+          <input name="hotelFrist" value="{{ f.hotelFrist }}" onInput="{{ onField }}" placeholder="Abrufbar bis 15.08.2026" type="text">
+          <input name="hotelLink" value="{{ f.hotelLink }}" onInput="{{ onField }}" placeholder="https://…">
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ isRundmail }}" hint-placeholder-val="{{ true }}">
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Tagesordnung — je Zeile ein Punkt</span>
+          <textarea name="tagesordnung" value="{{ f.tagesordnung }}" onInput="{{ onField }}" rows="{{ 5 }}"></textarea>
+        </label>
+        </sc-if>
+
+        <div style="display:flex; gap:10px">
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Unterzeichner</span>
+            <input name="signName" value="{{ f.signName }}" onInput="{{ onField }}">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Funktion</span>
+            <input name="signFunktion" value="{{ f.signFunktion }}" onInput="{{ onField }}">
+          </label>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isBrief }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; gap:14px; border-top:1px solid #E4E8EF; padding-top:20px">
+        <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#5A63A0; font-weight:600">Brief</div>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Bogen</span>
+          <select name="briefArt" value="{{ f.briefArt }}" onChange="{{ onField }}">
+            <option value="brief">Briefbogen A4</option>
+            <option value="kurz">Kurzmitteilung A5 quer</option>
+          </select>
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Empfänger</span>
+          <textarea name="empfaenger" value="{{ f.empfaenger }}" onInput="{{ onField }}" rows="{{ 4 }}"></textarea>
+        </label>
+        <div style="display:flex; gap:10px">
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Unser Zeichen</span>
+            <input name="zeichen" value="{{ f.zeichen }}" onInput="{{ onField }}">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Datum</span>
+            <input name="briefDatum" value="{{ f.briefDatum }}" onInput="{{ onField }}">
+          </label>
+        </div>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Betreff</span>
+          <input name="briefBetreff" value="{{ f.briefBetreff }}" onInput="{{ onField }}">
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Brieftext</span>
+          <textarea name="briefText" value="{{ f.briefText }}" onInput="{{ onField }}" rows="{{ 9 }}"></textarea>
+        </label>
+        <div style="display:flex; gap:10px">
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Unterzeichner</span>
+            <input name="signName" value="{{ f.signName }}" onInput="{{ onField }}">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Funktion</span>
+            <input name="signFunktion" value="{{ f.signFunktion }}" onInput="{{ onField }}">
+          </label>
+        </div>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Anlagen</span>
+          <input name="anlagen" value="{{ f.anlagen }}" onInput="{{ onField }}">
+        </label>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isCert }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; gap:14px; border-top:1px solid #E4E8EF; padding-top:20px">
+        <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#5A63A0; font-weight:600">Bescheinigung</div>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Teilnehmerin oder Teilnehmer</span>
+          <input name="teilnehmer" value="{{ f.teilnehmer }}" onInput="{{ onField }}">
+        </label>
+        <div style="display:flex; gap:10px">
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Zeitstunden</span>
+            <input name="stunden" value="{{ f.stunden }}" onInput="{{ onField }}" inputMode="numeric">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Ausstellungsort</span>
+            <input name="certOrt" value="{{ f.certOrt }}" onInput="{{ onField }}">
+          </label>
+        </div>
+        <div style="display:flex; gap:10px">
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Unterzeichner</span>
+            <input name="signName" value="{{ f.signName }}" onInput="{{ onField }}">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Funktion</span>
+            <input name="signFunktion" value="{{ f.signFunktion }}" onInput="{{ onField }}">
+          </label>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isPerson }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; gap:14px; border-top:1px solid #E4E8EF; padding-top:20px">
+        <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#5A63A0; font-weight:600">Person</div>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Name</span>
+          <input name="pName" value="{{ f.pName }}" onInput="{{ onField }}">
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Funktion</span>
+          <input name="pFunktion" value="{{ f.pFunktion }}" onInput="{{ onField }}">
+        </label>
+        <div style="display:flex; gap:10px">
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">Telefon</span>
+            <input name="pTel" value="{{ f.pTel }}" onInput="{{ onField }}">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px; flex:1">
+            <span style="font-size:12px; color:#5A63A0">E-Mail</span>
+            <input name="pMail" value="{{ f.pMail }}" onInput="{{ onField }}">
+          </label>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isLogo }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; gap:14px; border-top:1px solid #E4E8EF; padding-top:20px">
+        <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#5A63A0; font-weight:600">Logo</div>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Hintergrund</span>
+          <select name="logoGrund" value="{{ f.logoGrund }}" onChange="{{ onField }}">
+            <option value="hell">Für hellen Grund</option>
+            <option value="dunkel">Für dunklen Grund</option>
+            <option value="sw">Einfarbig Schwarz</option>
+            <option value="weiss">Einfarbig Weiß</option>
+          </select>
+        </label>
+        <label style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; color:#5A63A0">Signaturlinie</span>
+          <select name="variante" value="{{ f.variante }}" onChange="{{ onField }}">
+            <option value="herbst">Kupfer · Standard und Herbst</option>
+            <option value="fruehjahr">Grün · Frühjahr</option>
+            <option value="neutral">Lavendel · ganzjährig</option>
+          </select>
+        </label>
+        <div style="font-size:12px; line-height:1.55; color:#5A63A0; background:#F4F6FA; padding:12px 14px">PNG wird in vierfacher Auflösung ausgegeben. SVG ist die Vorlage für Druck und Fremddienstleister.</div>
+      </div>
+      </sc-if>
+
+      <div style="display:flex; flex-direction:column; gap:10px; border-top:1px solid #E4E8EF; padding-top:20px">
+        <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#5A63A0; font-weight:600">Ausgabe</div>
+        <sc-for list="{{ actions }}" as="a" hint-placeholder-count="3">
+          <button type="button" data-act="{{ a.id }}" onClick="{{ onAction }}" style="{{ a.style }}">{{ a.label }}</button>
+        </sc-for>
+        <div style="font-size:12px; line-height:1.5; color:{{ msgColor }}; min-height:32px; padding-top:2px">{{ message }}</div>
+      </div>
+    </div>
+
+    <div class="sheet-wrap" style="flex:1; min-width:0; background:#F2F4F8; padding:32px; overflow:auto; display:flex; flex-direction:column; gap:24px; align-items:flex-start">
+
+      <sc-if value="{{ isTileLike }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; gap:32px; align-items:flex-start; flex-wrap:wrap">
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <div style="font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:#5A63A0; font-weight:600">{{ f.ausgabe }} · Vorschau</div>
+          <canvas ref="{{ mainCanvas }}" style="max-width:560px; max-height:560px; width:auto; height:auto; border:1px solid #D7DCE6; background:#FFFFFF"></canvas>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:16px">
+          <div style="font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:#5A63A0; font-weight:600">Alle Formate</div>
+          <div style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap">
+            <div style="display:flex; flex-direction:column; gap:7px">
+              <canvas ref="{{ c1 }}" style="width:118px; height:118px; border:1px solid #D7DCE6"></canvas>
+              <div style="font-size:10px; color:#5A63A0; letter-spacing:0.08em">1080²</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:7px">
+              <canvas ref="{{ c2 }}" style="width:150px; height:78px; border:1px solid #D7DCE6"></canvas>
+              <div style="font-size:10px; color:#5A63A0; letter-spacing:0.08em">1200×627</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:7px">
+              <canvas ref="{{ c3 }}" style="width:112px; height:140px; border:1px solid #D7DCE6"></canvas>
+              <div style="font-size:10px; color:#5A63A0; letter-spacing:0.08em">1080×1350</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:7px">
+              <canvas ref="{{ c4 }}" style="width:90px; height:160px; border:1px solid #D7DCE6"></canvas>
+              <div style="font-size:10px; color:#5A63A0; letter-spacing:0.08em">1080×1920</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ hasSerie }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <div style="font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:#5A63A0; font-weight:600">Karussell</div>
+        <div style="display:flex; gap:14px; flex-wrap:wrap">
+          <sc-for list="{{ serieItems }}" as="s" hint-placeholder-count="3">
+            <div style="display:flex; flex-direction:column; gap:7px">
+              <canvas ref="{{ s.ref }}" style="width:160px; height:auto; border:1px solid #D7DCE6"></canvas>
+              <div style="font-size:10px; color:#5A63A0; letter-spacing:0.08em">{{ s.nr }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isSocial }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; gap:10px; max-width:620px">
+        <div style="font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:#5A63A0; font-weight:600">Begleittext für LinkedIn</div>
+        <div style="background:#FFFFFF; border:1px solid #D7DCE6; padding:16px 18px; font-size:14px; line-height:1.6; color:#33415C; white-space:pre-wrap">{{ captionText }}</div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isLogo }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; gap:28px; align-items:flex-start; flex-wrap:wrap">
+        <div style="display:flex; flex-direction:column; gap:10px">
+          <div style="font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:#5A63A0; font-weight:600">Signet</div>
+          <canvas ref="{{ l1 }}" style="width:190px; height:190px; border:1px solid #D7DCE6"></canvas>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px">
+          <div style="font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:#5A63A0; font-weight:600">Wort-Bild-Marke</div>
+          <canvas ref="{{ l2 }}" style="width:400px; height:auto; border:1px solid #D7DCE6"></canvas>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px">
+          <div style="font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:#5A63A0; font-weight:600">Kurzlogo</div>
+          <canvas ref="{{ l3 }}" style="width:300px; height:auto; border:1px solid #D7DCE6"></canvas>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px">
+          <div style="font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:#5A63A0; font-weight:600">Favicon</div>
+          <canvas ref="{{ l4 }}" style="width:96px; height:96px; border:1px solid #D7DCE6"></canvas>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isMail }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; gap:28px; align-items:flex-start; flex-wrap:wrap">
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <div style="font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:#5A63A0; font-weight:600">Vorschau · 600&nbsp;px</div>
+          <div style="width:620px; background:#F4F6FA; padding:10px; border:1px solid #D7DCE6">
+            <iframe ref="{{ mailFrame }}" title="Mailvorschau" style="width:600px; height:820px; border:0; background:#FFFFFF; display:block"></iframe>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px; width:420px">
+          <div style="font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:#5A63A0; font-weight:600">Betreffzeile</div>
+          <div style="font-family:'IBM Plex Mono', monospace; font-size:12px; line-height:1.6; color:#33415C; background:#E8ECF3; padding:12px 14px">{{ betreffFinal }}</div>
+          <div style="font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:#5A63A0; font-weight:600; padding-top:6px">Hinweise</div>
+          <div style="font-size:13px; line-height:1.6; color:#33415C">Der Quelltext nutzt Tabellen und feste Farben, damit Outlook ihn unverändert darstellt. Webfonts fallen dort auf Arial zurück. Die 8°-Linie ist als waagerechter Akzent ersetzt, weil Outlook keine Drehung kennt.</div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isDoc }}" hint-placeholder-val="{{ true }}">
+      <div ref="{{ docHost }}" class="sheet" style="background:#FFFFFF; box-shadow:0 2px 14px rgba(0,35,64,0.10); border:1px solid #D7DCE6"></div>
+      </sc-if>
+
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:940}}">
+const NAVY='#002340', BLUE='#003D6A', SLATE='#33415C', LAV='#5A63A0', LAVL='#9AA2D2', COP='#B4531F', GRN='#2F7A5A', LIGHT='#F4F6FA', LINE='#D7DCE6', WHITE='#FFFFFF';
+const VAR = {
+  fruehjahr:{ accent:GRN, onDark:'#7FCFA8', name:'Frühjahr' },
+  herbst:{ accent:COP, onDark:'#E8A87C', name:'Herbst' },
+  neutral:{ accent:LAVL, onDark:'#C7CEE4', name:'Ganzjährig' }
+};
+const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const SIZES={'1080x1080':[1080,1080],'1200x627':[1200,627],'1080x1350':[1080,1350],'1080x1920':[1080,1920]};
+const TAN8=Math.tan(8*Math.PI/180);
+const ABS={ name:'Insolvenzanwalt 24 e. V.', strasse:'Musterstraße 12', ort:'90402 Nürnberg', tel:'0911 000 00-0', web:'insolvenzanwalt24.de', mail:'geschaeftsstelle@insolvenzanwalt24.de', hotline:'0800 90 20 900' };
+
+const DEFAULTS = {
+  dachmarke:'IA24 Konferenzen', eventFormat:'Frühjahrstagung', titel:'Mallorca', jahr:'2027',
+  von:'2027-04-16', bis:'2027-04-19', datumManuell:'', status:'SAVE THE DATE', variante:'fruehjahr',
+  ausgabe:'1080x1080', grund:'dunkel', zusatz:'insolvenzanwalt24.de',
+  mailTyp:'std', mailBetreff:'', mailText:'Liebe Kolleginnen und Kollegen,\n\nbitte merken Sie sich den Termin der Frühjahrstagung vor. Programm, Tagungshotel und Anmeldung folgen im Januar 2027.',
+  nlAusgabe:'04 / 2026',
+  nlBeitraege:'Rechtsprechung | BGH konkretisiert die Versagungsgründe bei der Restschuldbefreiung | Der IX. Zivilsenat hat die Anforderungen an die Darlegungslast des Gläubigers geschärft. Für die Praxis bedeutet das eine sorgfältigere Dokumentation der Auskunftspflichten.\nKonferenzen | Herbsttagung Potsdam, 24.–25.09.2026 | Frühbucherbeitrag bis 31.07. — 120 Plätze.\nVerein | Vier neue Mitgliedskanzleien | Kiel, Trier, Zwickau und Ravensburg — damit ist der Verein an 104 Standorten vertreten.',
+  programm:'Do, 16.04. | Anreise, Begrüßung und Abendempfang\nFr, 17.04. | Fachvorträge und Mitgliederversammlung\nSa, 18.04. | Workshops und gemeinsames Abendessen',
+  anmeldung:'bis 31.01.2027 · Frühbucherbeitrag 320 €',
+  hotelName:'Tagungshotel Mallorca', hotelAnzahl:'60 Zimmer', hotelPreis:'139 €', hotelFrist:'15.02.2027', hotelLink:'https://insolvenzanwalt24.de/tagung/hotel',
+  tagesordnung:'Bericht des Vorstands\nKassenbericht und Entlastung\nBeitragsordnung 2028\nWahl des Vorstands\nVerschiedenes',
+  signName:'Dr. Vorname Nachname', signFunktion:'Vorsitzender',
+  briefArt:'brief', empfaenger:'Rechtsanwaltskanzlei Muster & Partner\nFrau Dr. Vorname Nachname\nBeispielweg 8\n10115 Berlin',
+  zeichen:'GS/2026-118', briefDatum:'12. Juni 2026', briefBetreff:'Aufnahme in den Verein — Bestätigung und weiteres Vorgehen',
+  briefText:'Sehr geehrte Frau Dr. Nachname,\n\nder Vorstand hat in seiner Sitzung am 5. Juni 2026 über Ihren Aufnahmeantrag entschieden. Wir freuen uns, Sie als Mitgliedskanzlei begrüßen zu dürfen.\n\nIn der Anlage finden Sie die Qualitätsrichtlinien sowie die Beitragsordnung. Ihr Kanzleieintrag für die Standortsuche wird innerhalb von zwei Wochen freigeschaltet.\n\nMit kollegialen Grüßen',
+  anlagen:'Qualitätsrichtlinien · Beitragsordnung',
+  teilnehmer:'Dr. Vorname Nachname', stunden:'10', certOrt:'Nürnberg',
+  pName:'Dr. Vorname Nachname', pFunktion:'Vorsitzender', pTel:'0911 000 00-0', pMail:'name@insolvenzanwalt24.de',
+  logoGrund:'hell',
+  sTyp:'leitsatz', sKicker:'RECHTSPRECHUNG',
+  sBig:'BGH schärft die Darlegungslast des Gläubigers bei der Restschuldbefreiung',
+  sSub:'Für die Praxis heißt das: Auskunftspflichten künftig lückenlos dokumentieren.',
+  sFl:'BGH, Beschl. v. 12.03.2026 – IX ZB 00/25', sFr:'insolvenzanwalt24.de',
+  sBildMode:'ohne',
+  sSerie:'Was sich geändert hat | Der IX. Zivilsenat verlangt vom Gläubiger künftig eine substantiierte Darlegung, welche Auskunft konkret verlangt und in welcher Form sie verweigert wurde. Pauschale Verweise auf eine unvollständige Vermögensauskunft genügen nicht mehr.\nWas das für Anträge bedeutet | Versagungsanträge müssen den Zeitpunkt der Aufforderung, ihren Inhalt und die Reaktion des Schuldners nachvollziehbar wiedergeben. Wer hier abkürzt, riskiert die Zurückweisung als unzulässig.\nWas Sie jetzt tun sollten | Legen Sie in laufenden Verfahren eine Auskunftsakte an: Datum, Wortlaut der Aufforderung, Zustellnachweis, Antwort oder Fristablauf. Diese Dokumentation entscheidet über den Erfolg des Antrags.',
+  sFazitTitel:'Fazit', sFazit:'Die Entscheidung verschiebt Aufwand nach vorn: Wer Auskunftspflichten von Anfang an dokumentiert, gewinnt später Zeit. Fragen zur Umsetzung? Sprechen Sie eine Mitgliedskanzlei in Ihrer Nähe an.'
+};
+
+const SOCIAL_DEF={
+  zitat:{label:'Zitat / Kernaussage',mode:'quote',kicker:'STANDPUNKT',big:'Eine Sanierung beginnt Monate vor dem Antrag — nicht am Tag der Zahlungsunfähigkeit.',sub:'',fl:'Dr. Vorname Nachname',fr:'Vorsitzender',tags:'#Insolvenzrecht #Sanierung'},
+  leitsatz:{label:'Rechtsprechung: Leitsatz',mode:'headline',kicker:'RECHTSPRECHUNG',big:'BGH schärft die Darlegungslast des Gläubigers bei der Restschuldbefreiung',sub:'Für die Praxis heißt das: Auskunftspflichten künftig lückenlos dokumentieren.',fl:'BGH, Beschl. v. 12.03.2026 – IX ZB 00/25',fr:'insolvenzanwalt24.de',tags:'#Rechtsprechung #BGH #Restschuldbefreiung'},
+  fachbeitrag:{label:'Fachbeitrag / Ratgeber',mode:'headline',kicker:'RATGEBER',big:'Pfändungsfreigrenzen 2026: was Schuldnern bleibt',sub:'Neue Tabelle, alle Grenzbeträge und was bei Unterhaltspflichten gilt.',fl:'Zum Beitrag',fr:'insolvenzanwalt24.de',tags:'#Pfändungsfreigrenzen #Schuldnerberatung'},
+  vorstellung:{label:'Mitgliedsvorstellung',mode:'headline',kicker:'MITGLIED IM PORTRÄT',big:'Dr. Vorname Nachname',sub:'Kanzlei Muster & Partner, Kiel · Schwerpunkte: Eigenverwaltung, Betriebsfortführung, Sanierungsberatung.',fl:'Mitglied seit 2019',fr:'insolvenzanwalt24.de',tags:'#MitgliedImPorträt #Insolvenzrecht #Fachanwalt'},
+  mitglied:{label:'Neues Mitglied / Standort',mode:'headline',kicker:'NEUES MITGLIED',big:'Kanzlei Muster & Partner, Kiel',sub:'Damit ist der Verein an 104 Standorten vertreten.',fl:'Willkommen im Verein',fr:'insolvenzanwalt24.de',tags:'#Willkommen #Insolvenzrecht'},
+  personalie:{label:'Personalie / Vorstand',mode:'headline',kicker:'PERSONALIE',big:'Dr. Vorname Nachname',sub:'Von der Mitgliederversammlung zur Vorsitzenden gewählt.',fl:'Mitgliederversammlung 2026',fr:'insolvenzanwalt24.de',tags:'#Personalie #Vorstand'},
+  zahl:{label:'Zahl oder Statistik',mode:'number',kicker:'IN ZAHLEN',big:'104',sub:'Standorte bundesweit — Fachanwältinnen und Fachanwälte für Insolvenzrecht.',fl:'Stand August 2026',fr:'insolvenzanwalt24.de',tags:'#Insolvenzrecht #Verein'},
+  stelle:{label:'Stellenanzeige',mode:'headline',kicker:'STELLENANGEBOT',big:'Rechtsanwältin für Insolvenzrecht, Nürnberg',sub:'Mitgliedskanzlei sucht Verstärkung — Vollzeit, ab sofort.',fl:'Bewerbung an die Geschäftsstelle',fr:'insolvenzanwalt24.de',tags:'#Stellenangebot #Jobs #Insolvenzrecht'},
+  frage:{label:'Frage an die Community',mode:'quote',kicker:'FRAGE AN SIE',big:'Wie dokumentieren Sie Auskunftspflichten in der Praxis?',sub:'Wir sammeln Erfahrungen für die Herbsttagung — Antworten in die Kommentare.',fl:'',fr:'insolvenzanwalt24.de',tags:'#Praxisfrage #Insolvenzrecht'},
+  rueckblick:{label:'Rückblick mit Foto',mode:'headline',kicker:'RÜCKBLICK',big:'Herbsttagung Potsdam 2026',sub:'Zwei Tage Fortbildung, sechs Fachvorträge, 118 Teilnehmende.',fl:'Danke für den Austausch',fr:'insolvenzanwalt24.de',tags:'#Rückblick #Herbsttagung'},
+  referentin:{label:'Zitat einer Referentin',mode:'quote',kicker:'STIMMEN ZUR TAGUNG',big:'Der Austausch unter Kolleginnen ist der eigentliche Wert dieser Tagung.',sub:'',fl:'Dr. Vorname Nachname',fr:'Herbsttagung Potsdam 2026',tags:'#Herbsttagung #Fortbildung'}
+};
+
+const TABS_DEF=[
+  {id:'kacheln',label:'Veranstaltungskacheln'},
+  {id:'social',label:'Social-Kacheln'},
+  {id:'mail',label:'E-Mails'},
+  {id:'brief',label:'Briefbogen'},
+  {id:'cert',label:'Teilnahmebescheinigung'},
+  {id:'karte',label:'Visitenkarte'},
+  {id:'sig',label:'E-Mail-Signatur'},
+  {id:'logo',label:'Logo-Dateien'}
+];
+var SOCIAL=SOCIAL_DEF, TABS=TABS_DEF;
+
+const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+class Component extends DCLogic {
+  state = { tab:'kacheln', f:{...DEFAULTS}, message:'', msgKind:'info', saved:false };
+
+  componentDidMount(){
+    try{
+      const raw = localStorage.getItem('ia24-generator-v1');
+      if(raw){ const p=JSON.parse(raw); this.setState({ f:{...DEFAULTS, ...p}, saved:true }); }
+    }catch(e){}
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>this.forceUpdate());
+    this.paintAll();
+  }
+  componentDidUpdate(){ this.paintAll(); }
+
+  save(f){ try{ localStorage.setItem('ia24-generator-v1', JSON.stringify(f)); }catch(e){} }
+
+  loadImage(file){
+    if(!file||!/^image\//.test(file.type)){ this.msg('Bitte eine Bilddatei ablegen (JPG oder PNG).','warn'); return; }
+    const r=new FileReader();
+    r.onload=()=>{ const img=new Image(); img.onload=()=>{ this._img=img; this.setState({message:'Bild eingesetzt: '+file.name}); }; img.src=r.result; };
+    r.readAsDataURL(file);
+  }
+
+  set(name,value){
+    const f={...this.state.f,[name]:value};
+    this.setState({f, message:'', saved:true});
+    this.save(f);
+  }
+
+  /* ---------- Daten ---------- */
+  dateLine(numeric){
+    const f=this.state.f;
+    if(f.datumManuell) return f.datumManuell;
+    const a=f.von?new Date(f.von+'T00:00:00'):null, b=f.bis?new Date(f.bis+'T00:00:00'):null;
+    if(!a) return '';
+    const p=n=>String(n).padStart(2,'0');
+    if(!b||+a===+b) return numeric? `${p(a.getDate())}.${p(a.getMonth()+1)}.${a.getFullYear()}` : `${a.getDate()}. ${MONTHS[a.getMonth()]} ${a.getFullYear()}`;
+    if(a.getMonth()===b.getMonth()&&a.getFullYear()===b.getFullYear())
+      return numeric? `${p(a.getDate())}.–${p(b.getDate())}.${p(a.getMonth()+1)}.${a.getFullYear()}` : `${a.getDate()}.–${b.getDate()}. ${MONTHS[a.getMonth()]} ${a.getFullYear()}`;
+    return `${p(a.getDate())}.${p(a.getMonth()+1)}.–${p(b.getDate())}.${p(b.getMonth()+1)}.${b.getFullYear()}`;
+  }
+  subject(){
+    const f=this.state.f;
+    if(f.mailBetreff) return f.mailBetreff;
+    const ort=[f.titel,f.jahr].filter(Boolean).join(' ');
+    if(f.mailTyp==='newsletter') return `IA24 Intern ${f.nlAusgabe}`;
+    if(f.mailTyp==='rundmail') return `${f.eventFormat} ${this.dateLine(true)} — Einladung und Tagesordnung`;
+    if(f.mailTyp==='einladung') return `Einladung und Programm — IA24 ${f.eventFormat} ${ort}, ${this.dateLine(true)}`;
+    return `Save the Date — IA24 ${f.eventFormat}, ${ort}, ${this.dateLine(true)}`;
+  }
+
+  /* ---------- Primitive: Layout → Canvas/SVG ---------- */
+  signet(x,y,e,opt){
+    const it=[], t=opt.accent, fill=opt.fill, fg=opt.fg;
+    if(fill) it.push({t:'rect',x,y,w:e,h:e,fill});
+    else it.push({t:'rect',x,y,w:e,h:e,stroke:opt.stroke,sw:Math.max(1,e*0.014)});
+    const fs=e*0.30;
+    it.push({t:'text',x:x+e/2,y:y+e*0.42+fs*0.35,s:fs,w:700,fill:fg,align:'center',ls:-fs*0.01,text:'IA24'});
+    const lw=e*0.60, lx=x+e*0.20, ly=y+e*0.72;
+    it.push({t:'line',x1:lx,y1:ly,x2:lx+lw,y2:ly-lw*TAN8,sw:Math.max(1,e*0.022),stroke:t});
+    return it;
+  }
+  bandLine(xA,xB,yTop,yBot,stroke,sw){
+    const len=xB-xA, dy=len*TAN8/2, mid=(yTop+yBot)/2;
+    if(len<80||yBot-yTop<len*TAN8+8) return [];
+    return [{t:'line',x1:xA,y1:mid+dy,x2:xB,y2:mid-dy,sw,stroke}];
+  }
+  fontFor(weight,fs,ls){
+    const fam=(weight>=600&&!(ls>0))?'Archivo, Helvetica, sans-serif':"'IBM Plex Sans', Helvetica, sans-serif";
+    return `${weight} ${fs}px ${fam}`;
+  }
+  wrap(text,fs,weight,maxW,ls){
+    const c=this._m||(this._m=document.createElement('canvas').getContext('2d'));
+    c.font=this.fontFor(weight,fs,ls);
+    if('letterSpacing' in c) c.letterSpacing='0px';
+    const words=String(text).split(/\s+/).filter(Boolean), lines=[]; let cur='';
+    for(const w of words){ const t=cur?cur+' '+w:w; if(c.measureText(t).width<=maxW||!cur){cur=t;} else {lines.push(cur);cur=w;} }
+    if(cur) lines.push(cur);
+    return lines;
+  }
+  fitTitle(text,maxFs,minFs,weight,maxW,maxLines){
+    let fs=maxFs, lines=this.wrap(text,fs,weight,maxW,-1);
+    while(lines.length>maxLines&&fs>minFs){ fs-=Math.max(2,fs*0.06); lines=this.wrap(text,fs,weight,maxW,-1); }
+    return {fs,lines};
+  }
+
+  buildTile(fmt){
+    const f=this.state.f, [W,H]=SIZES[fmt], dark=f.grund==='dunkel', v=VAR[f.variante]||VAR.herbst;
+    const bg=dark?NAVY:WHITE, fg=dark?WHITE:NAVY, sub=dark?'#C7CEE4':SLATE, lab=dark?LAVL:LAV;
+    const badgeCol=dark?v.onDark:v.accent;
+    const k=W/1080, wide=fmt==='1200x627';
+    const pad=Math.round((wide?58:96)*k*(fmt==='1080x1920'?0.95:1));
+    const it=[{t:'rect',x:0,y:0,w:W,h:H,fill:bg}];
+    if(!dark) it.push({t:'rect',x:0,y:0,w:W,h:H,stroke:LINE,sw:2});
+
+    const e=Math.round((wide?80:132)*k);
+    it.push(...this.signet(pad,pad,e,{fill:dark?null:NAVY,stroke:dark?LAVL:null,fg:WHITE,accent:v.accent}));
+
+    const lfs=Math.round((wide?22:26)*k);
+    it.push({t:'text',x:pad+e+Math.round(34*k),y:pad+e*0.55+lfs*0.35,s:lfs,w:600,fill:lab,ls:lfs*0.24,text:'KONFERENZEN'});
+
+    let badgeBottom=pad, badgeLeft=W;
+    if(f.status){
+      const bfs=Math.round((wide?21:26)*k), padX=Math.round((wide?18:24)*k), padY=Math.round((wide?14:20)*k);
+      const c=this._m||(this._m=document.createElement('canvas').getContext('2d'));
+      c.font=`700 ${bfs}px 'IBM Plex Sans', Helvetica, sans-serif`;
+      const tw=c.measureText(f.status).width+f.status.length*bfs*0.2;
+      const bw=tw+padX*2, bh=bfs+padY*2;
+      const bx=(fmt==='1080x1920')?pad:(W-pad-bw);
+      const by=(fmt==='1080x1920')?(pad+e+Math.round(40*k)):(wide?(pad+Math.round((e-bh)/2)):pad);
+      it.push({t:'rect',x:bx,y:by,w:bw,h:bh,stroke:v.accent,sw:Math.max(1,2*k)});
+      it.push({t:'text',x:bx+padX,y:by+bh/2+bfs*0.35,s:bfs,w:700,fill:badgeCol,ls:bfs*0.2,text:f.status});
+      badgeBottom=by+bh; badgeLeft=bx;
+    }
+
+    const maxW=W-pad*2;
+    const zfs=Math.round(24*k);
+    let cursor=H-pad;
+    if(f.zusatz&&!wide){ it.push({t:'text',x:pad,y:cursor,s:zfs,w:400,fill:lab,ls:zfs*0.06,text:f.zusatz}); cursor-=zfs+Math.round(30*k); }
+    if(f.zusatz&&wide) it.push({t:'text',x:W-pad,y:H-pad,s:Math.round(20*k),w:400,fill:lab,align:'right',ls:1,text:f.zusatz});
+    const dfs=Math.round((wide?32:40)*k);
+    const dateTxt=this.dateLine(fmt==='1080x1920'||fmt==='1200x627');
+    it.push({t:'text',x:pad,y:cursor,s:dfs,w:500,fill:sub,ls:dfs*0.06,text:dateTxt});
+    cursor-=dfs+Math.round((wide?28:34)*k);
+
+    const titleMax=wide?78:(fmt==='1080x1920'?100:132);
+    const maxLines=wide?2:3;
+    const {fs,lines}=this.fitTitle(`${f.titel} ${f.jahr}`.trim(),Math.round(titleMax*k),Math.round(46*k),600,maxW,maxLines);
+    const lh=fs*1.0;
+    for(let i=lines.length-1;i>=0;i--){ it.push({t:'text',x:pad,y:cursor,s:fs,w:600,fill:fg,ls:-fs*0.015,text:lines[i]}); cursor-=lh; }
+    cursor-=Math.round(2*k);
+
+    const ffs=Math.round((wide?24:28)*k);
+    it.push({t:'text',x:pad,y:cursor,s:ffs,w:600,fill:lab,ls:ffs*0.22,text:f.eventFormat.toUpperCase()});
+    const titleTop=cursor-ffs;
+
+    const gap=Math.round((wide?10:24)*k);
+    const xA=-80, xB=W+80, need=(xB-xA)*TAN8+8;
+    let top=Math.max(pad+e,badgeBottom)+gap, bot=titleTop-gap;
+    if(bot-top<need) bot=top+need;
+    it.push(...this.bandLine(xA, xB, top, bot, v.accent, Math.max(2,3*k)));
+    return {W,H,items:it};
+  }
+
+  drawCover(items,x,y,w,h){
+    const img=this._img; if(!img||!img.complete||!img.naturalWidth) return false;
+    const s=Math.max(w/img.naturalWidth,h/img.naturalHeight);
+    const dw=img.naturalWidth*s, dh=img.naturalHeight*s;
+    items.push({t:'img',x:x+(w-dw)/2,y:y+(h-dh)/2,w:dw,h:dh,clip:{x,y,w,h}});
+    return true;
+  }
+  serieLines(){
+    return String(this.state.f.sSerie||'').split('\n').map(l=>l.trim()).filter(Boolean)
+      .map(l=>{const p=l.split('|'); return {h:(p[0]||'').trim(), t:(p[1]||'').trim()};});
+  }
+
+  buildSocial(fmt,slide){
+    const f=this.state.f, [W,H]=SIZES[fmt], wide=fmt==='1200x627';
+    const preset=SOCIAL[f.sTyp]||SOCIAL.leitsatz;
+    const mode=slide?'headline':preset.mode;
+    const dark=f.grund==='dunkel', v=VAR[f.variante]||VAR.herbst;
+    const k=W/1080, pad=Math.round((wide?58:96)*k);
+    const bg=dark?NAVY:WHITE, fg=dark?WHITE:NAVY, sub=dark?'#C7CEE4':SLATE, lab=dark?LAVL:LAV;
+    const it=[{t:'rect',x:0,y:0,w:W,h:H,fill:bg}];
+    if(!dark) it.push({t:'rect',x:0,y:0,w:W,h:H,stroke:LINE,sw:2});
+
+    let topY=pad;
+    if(!slide&&f.sBildMode==='flaeche'&&this._img){
+      if(this.drawCover(it,0,0,W,H)) it.push({t:'rect',x:0,y:0,w:W,h:H,fill:dark?'rgba(0,35,64,0.80)':'rgba(0,35,64,0.72)'});
+    } else if(!slide&&f.sBildMode==='oben'&&this._img){
+      const ih=Math.round(H*(wide?0.42:0.38));
+      if(this.drawCover(it,0,0,W,ih)) topY=ih+pad;
+    }
+    const overImg=!slide&&f.sBildMode==='flaeche'&&this._img;
+    const fgC=overImg?WHITE:fg, subC=overImg?'#C7CEE4':sub, labC=overImg?LAVL:lab;
+
+    const e=Math.round((wide?80:118)*k);
+    it.push(...this.signet(pad,topY,e,{fill:(dark||overImg)?null:NAVY,stroke:(dark||overImg)?LAVL:null,fg:WHITE,accent:v.accent}));
+    const kicker=slide?`${String(slide.i+1).padStart(2,'0')} / ${String(slide.n).padStart(2,'0')}`:(f.sKicker||preset.kicker);
+    const lfs=Math.round((wide?21:25)*k);
+    it.push({t:'text',x:pad+e+Math.round(30*k),y:topY+e*0.55+lfs*0.35,s:lfs,w:600,fill:labC,ls:lfs*0.24,text:kicker});
+    const headerBottom=topY+e;
+
+    let cursor=H-pad;
+    const ffs=Math.round((wide?20:24)*k);
+    const fl=slide?'':(f.sFl||''), fr=slide?(f.sFr||preset.fr):(f.sFr||'');
+    if(fl||fr){
+      if(fl) it.push({t:'text',x:pad,y:cursor,s:ffs,w:500,fill:labC,ls:ffs*0.1,text:fl});
+      if(fr) it.push({t:'text',x:W-pad,y:cursor,s:ffs,w:400,fill:labC,align:'right',ls:ffs*0.06,text:fr});
+      cursor-=ffs+Math.round(34*k);
+    }
+
+    const subTxt=slide?slide.t:(f.sSub||'');
+    if(subTxt){
+      const sfs=Math.round((wide?26:34)*k), lines=this.wrap(subTxt,sfs,400,W-pad*2).slice(0,4);
+      for(let i=lines.length-1;i>=0;i--){ it.push({t:'text',x:pad,y:cursor,s:sfs,w:400,fill:subC,ls:0,text:lines[i]}); cursor-=sfs*1.45; }
+      cursor-=Math.round(20*k);
+    }
+
+    let bigTop=cursor;
+    const bigTxt=slide?slide.h:(f.sBig||preset.big);
+    if(mode==='number'){
+      const nfs=Math.round((wide?190:300)*k);
+      it.push({t:'text',x:pad,y:cursor,s:nfs,w:700,fill:fgC,ls:-nfs*0.02,text:bigTxt});
+      bigTop=cursor-nfs*0.78;
+    } else {
+      const quote=mode==='quote';
+      const max=Math.round((wide?60:(quote?86:92))*k), min=Math.round(38*k);
+      const avail=cursor-(headerBottom+Math.round(60*k));
+      let fs=max, lines=this.wrap(quote?'\u201E'+bigTxt+'\u201C':bigTxt,fs,600,W-pad*2);
+      while(fs>min&&lines.length*fs*1.06>avail){ fs-=Math.max(2,fs*0.06); lines=this.wrap(quote?'\u201E'+bigTxt+'\u201C':bigTxt,fs,600,W-pad*2); }
+      const lh=fs*1.08;
+      for(let i=lines.length-1;i>=0;i--){ it.push({t:'text',x:pad,y:cursor,s:fs,w:600,fill:fgC,ls:-fs*0.014,text:lines[i]}); cursor-=lh; }
+      bigTop=cursor;
+    }
+
+    const xA=-80, xB=W+80, need=(xB-xA)*TAN8+8, gap=Math.round((wide?10:22)*k);
+    const top=headerBottom+gap, bot=bigTop-gap;
+    if(bot-top>=need) it.push(...this.bandLine(xA,xB,top,bot,v.accent,Math.max(2,3*k)));
+    else it.push({t:'rect',x:pad,y:bigTop+Math.round(6*k),w:Math.round(96*k),h:Math.max(3,4*k),fill:v.accent});
+    return {W,H,items:it};
+  }
+
+  slideMetrics(fmt,headline,cont){
+    const [W,H]=SIZES[fmt], wide=fmt==='1200x627', k=W/1080, pad=Math.round((wide?58:96)*k);
+    const e=Math.round((wide?66:92)*k), maxW=W-pad*2;
+    let y=pad+e+Math.round(66*k);
+    const hMax=Math.round((wide?46:62)*k), hMin=Math.round(30*k);
+    let hfs=hMax, hl=this.wrap(headline,hfs,600,maxW);
+    while(hl.length>3&&hfs>hMin){ hfs-=Math.max(2,hfs*0.06); hl=this.wrap(headline,hfs,600,maxW); }
+    hl.forEach(()=>{ y+=hfs*1.06; });
+    y+=Math.round((wide?26:40)*k)+(cont?Math.round(70*k):0);
+    const footY=H-pad-Math.round((wide?24:30)*k);
+    const bmin=Math.round((wide?19:23)*k), bmax=Math.round((wide?27:34)*k);
+    const capacity=Math.max(1,Math.floor((footY-y)/(bmin*1.5)));
+    return {W,H,wide,k,pad,e,maxW,y,hfs,hl,footY,bmin,bmax,capacity};
+  }
+
+  slideDeck(fmt){
+    const f=this.state.f, items=this.serieLines();
+    if(!items.length) return [];
+    const deck=[{kind:'cover'}];
+    items.forEach(s=>{
+      const m=this.slideMetrics(fmt,s.h,false);
+      const mc=this.slideMetrics(fmt,s.h,true);
+      const lines=this.wrap(s.t,m.bmin,400,m.maxW);
+      if(lines.length<=m.capacity){ deck.push({kind:'item',h:s.h,t:s.t}); return; }
+      let i=0, first=true;
+      while(i<lines.length){
+        const cap=first?m.capacity:mc.capacity;
+        deck.push({kind:'item',h:s.h,t:lines.slice(i,i+cap).join(' '),cont:!first});
+        i+=cap; first=false;
+      }
+    });
+    if(String(f.sFazit||'').trim()) deck.push({kind:'fazit',h:f.sFazitTitel||'Fazit',t:f.sFazit});
+    return deck.map((s,i)=>({...s,i,n:deck.length}));
+  }
+
+  buildSlide(fmt,s){
+    if(s.kind==='cover') return this.buildSocial(fmt);
+    const f=this.state.f;
+    const m=this.slideMetrics(fmt,s.h,!!s.cont);
+    const {W,H,wide,k,pad,e,maxW,footY,bmin,bmax}=m;
+    const dark=f.grund==='dunkel', v=VAR[f.variante]||VAR.herbst;
+    const fazit=s.kind==='fazit';
+    const bg=fazit?(dark?'#013659':LIGHT):(dark?NAVY:WHITE);
+    const fg=dark?WHITE:NAVY, sub=dark?'#C7CEE4':SLATE, lab=dark?LAVL:LAV;
+    const it=[{t:'rect',x:0,y:0,w:W,h:H,fill:bg}];
+    if(!dark) it.push({t:'rect',x:0,y:0,w:W,h:H,stroke:LINE,sw:2});
+
+    it.push(...this.signet(pad,pad,e,{fill:dark?null:NAVY,stroke:dark?LAVL:null,fg:WHITE,accent:v.accent}));
+    const lfs=Math.round((wide?19:23)*k);
+    const nr=`${String(s.i+1).padStart(2,'0')} / ${String(s.n).padStart(2,'0')}`;
+    it.push({t:'text',x:pad+e+Math.round(26*k),y:pad+e*0.42+lfs*0.35,s:lfs,w:600,fill:lab,ls:lfs*0.22,text:fazit?(f.sFazitTitel||'FAZIT').toUpperCase():nr});
+    if(fazit) it.push({t:'text',x:W-pad,y:pad+e*0.42+lfs*0.35,s:lfs,w:400,fill:lab,align:'right',ls:lfs*0.1,text:nr});
+
+    let y=pad+e+Math.round(66*k);
+    it.push({t:'rect',x:pad,y:y-Math.round(30*k),w:Math.round(92*k),h:Math.max(3,4*k),fill:v.accent});
+
+    const hfs=m.hfs;
+    m.hl.forEach(l=>{ y+=hfs*0.86; it.push({t:'text',x:pad,y,s:hfs,w:600,fill:fg,ls:-hfs*0.014,text:l}); y+=hfs*0.2; });
+    if(s.cont) it.push({t:'text',x:pad,y:y+Math.round(34*k),s:Math.round((wide?18:22)*k),w:500,fill:lab,ls:2,text:'FORTSETZUNG'});
+
+    y=m.y;
+    let bfs=bmax;
+    let bl=this.wrap(s.t,bfs,400,maxW);
+    while(bfs>bmin && y+bl.length*bfs*1.5 > footY){ bfs-=1; bl=this.wrap(s.t,bfs,400,maxW); }
+    const room=Math.max(1,Math.floor((footY-y)/(bfs*1.5)));
+    if(bl.length>room){ bl=bl.slice(0,room); this._overflow=true; }
+    bl.forEach(l=>{ y+=bfs*1.12; it.push({t:'text',x:pad,y,s:bfs,w:400,fill:sub,ls:0,text:l}); y+=bfs*0.38; });
+
+    const ffs=Math.round((wide?19:23)*k);
+    const last=s.i+1===s.n;
+    it.push({t:'text',x:pad,y:H-pad,s:ffs,w:500,fill:lab,ls:ffs*0.1,text:last?(f.sFr||'insolvenzanwalt24.de'):'WEITER WISCHEN'});
+    if(!last) it.push({t:'text',x:W-pad,y:H-pad,s:ffs,w:400,fill:lab,align:'right',ls:ffs*0.06,text:f.sFr||'insolvenzanwalt24.de'});
+    return {W,H,items:it};
+  }
+
+  caption(){
+    const f=this.state.f, p=SOCIAL[f.sTyp]||SOCIAL.leitsatz;
+    const parts=[f.sBig||p.big];
+    if(f.sSub) parts.push(f.sSub);
+    if(f.sFl) parts.push(f.sFl);
+    const serie=this.serieLines();
+    if(serie.length){
+      parts.push(serie.map((s,i)=>`${i+1}. ${s.h}`).join('\n'));
+      if(String(f.sFazit||'').trim()) parts.push(f.sFazit);
+    }
+    parts.push(`${p.tags} #IA24 #Fachanwalt #Insolvenzanwalt24`);
+    return parts.join('\n\n');
+  }
+
+  buildLogo(kind){
+    const f=this.state.f, v=VAR[f.variante]||VAR.herbst, g=f.logoGrund;
+    const mono = g==='sw'||g==='weiss';
+    const boxFill = g==='sw'?'#000000':(g==='dunkel'||g==='weiss'?null:NAVY);
+    const boxStroke = (g==='dunkel'||g==='weiss')?(g==='weiss'?WHITE:LAVL):null;
+    const accent = mono?WHITE:v.accent;
+    const nameCol = g==='weiss'?WHITE:(g==='dunkel'?WHITE:(g==='sw'?'#000000':NAVY));
+    const subCol = g==='weiss'?'#C7CEE4':(g==='dunkel'?LAVL:(g==='sw'?'#555555':LAV));
+    const bgFill = (g==='dunkel')?NAVY:(g==='weiss'?'#333333':WHITE);
+    const sg=o=>this.signet(o.x,o.y,o.e,{fill:boxFill,stroke:boxStroke,fg:WHITE,accent});
+
+    if(kind==='signet'){ const S=512; return {W:S,H:S,items:[{t:'rect',x:0,y:0,w:S,h:S,fill:bgFill},...sg({x:56,y:56,e:400})]}; }
+    if(kind==='favicon'){ const S=256, e=256, fs=e*0.22;
+      return {W:S,H:S,items:[{t:'rect',x:0,y:0,w:S,h:S,fill:boxFill||NAVY},
+        {t:'text',x:S/2,y:S*0.44,s:fs,w:700,fill:WHITE,align:'center',ls:-fs*0.01,text:'IA'},
+        {t:'text',x:S/2,y:S*0.44+fs*1.02,s:fs,w:700,fill:WHITE,align:'center',ls:-fs*0.01,text:'24'}]};
+    }
+    if(kind==='kurz'){ const fs=190, base=210, x0=60;
+      const c=this._m||(this._m=document.createElement('canvas').getContext('2d'));
+      c.font=`700 ${fs}px Archivo, Helvetica, sans-serif`;
+      const tw=c.measureText('IA24').width;
+      const y1=base+fs*0.14+tw*TAN8, H=Math.round(y1+34), W=Math.round(x0*2+tw);
+      return {W,H,items:[{t:'rect',x:0,y:0,w:W,h:H,fill:bgFill},
+        {t:'text',x:x0,y:base,s:fs,w:700,fill:nameCol,ls:-fs*0.015,text:'IA24'},
+        {t:'line',x1:x0,y1:y1,x2:x0+tw,y2:y1-tw*TAN8,sw:9,stroke:mono?nameCol:BLUE}]};
+    }
+    const W=1080,H=340,e=180;
+    const items=[{t:'rect',x:0,y:0,w:W,h:H,fill:bgFill},...sg({x:60,y:80,e}),
+      {t:'line',x1:60+e+58,y1:96,x2:60+e+58,y2:96+148,sw:2,stroke:mono?subCol:LINE},
+      {t:'text',x:60+e+58+44,y:172,s:58,w:600,fill:nameCol,ls:-58*0.012,text:'Insolvenzanwalt 24 e. V.'},
+      {t:'text',x:60+e+58+44,y:226,s:26,w:500,fill:subCol,ls:26*0.2,text:'VEREIN FÜR INSOLVENZRECHT'}];
+    return {W,H,items};
+  }
+
+  paint(canvas,spec,cssW){
+    if(!canvas||!spec) return;
+    const dpr=Math.min(2,window.devicePixelRatio||1);
+    canvas.width=spec.W; canvas.height=spec.H;
+    const ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,spec.W,spec.H);
+    for(const i of spec.items){
+      if(i.t==='rect'){
+        if(i.fill){ ctx.fillStyle=i.fill; ctx.fillRect(i.x,i.y,i.w,i.h); }
+        if(i.stroke){ ctx.strokeStyle=i.stroke; ctx.lineWidth=i.sw||1; ctx.strokeRect(i.x+(i.sw||1)/2,i.y+(i.sw||1)/2,i.w-(i.sw||1),i.h-(i.sw||1)); }
+      } else if(i.t==='line'){
+        ctx.strokeStyle=i.stroke; ctx.lineWidth=i.sw||1; ctx.beginPath(); ctx.moveTo(i.x1,i.y1); ctx.lineTo(i.x2,i.y2); ctx.stroke();
+      } else if(i.t==='img'){
+        if(this._img){
+          ctx.save();
+          if(i.clip){ ctx.beginPath(); ctx.rect(i.clip.x,i.clip.y,i.clip.w,i.clip.h); ctx.clip(); }
+          ctx.drawImage(this._img,i.x,i.y,i.w,i.h);
+          ctx.restore();
+        }
+      } else if(i.t==='text'){
+        ctx.font=this.fontFor(i.w,i.s,i.ls);
+        ctx.fillStyle=i.fill; ctx.textAlign=i.align||'left'; ctx.textBaseline='alphabetic';
+        if('letterSpacing' in ctx){ ctx.letterSpacing=(i.ls||0)+'px'; ctx.fillText(i.text,i.x,i.y); ctx.letterSpacing='0px'; }
+        else this.trackedText(ctx,i);
+      }
+    }
+  }
+  trackedText(ctx,i){
+    const ls=i.ls||0, chars=String(i.text).split('');
+    let total=chars.reduce((a,c)=>a+ctx.measureText(c).width+ls,0)-ls;
+    let x=i.align==='center'?i.x-total/2:i.x;
+    for(const c of chars){ ctx.fillText(c,x,i.y); x+=ctx.measureText(c).width+ls; }
+  }
+  toSVG(spec){
+    const parts=[`<svg xmlns="http://www.w3.org/2000/svg" width="${spec.W}" height="${spec.H}" viewBox="0 0 ${spec.W} ${spec.H}">`];
+    for(const i of spec.items){
+      if(i.t==='rect'){
+        if(i.fill) parts.push(`<rect x="${i.x}" y="${i.y}" width="${i.w}" height="${i.h}" fill="${i.fill}"/>`);
+        if(i.stroke) parts.push(`<rect x="${i.x+(i.sw||1)/2}" y="${i.y+(i.sw||1)/2}" width="${i.w-(i.sw||1)}" height="${i.h-(i.sw||1)}" fill="none" stroke="${i.stroke}" stroke-width="${i.sw||1}"/>`);
+      } else if(i.t==='line'){
+        parts.push(`<line x1="${i.x1}" y1="${i.y1}" x2="${i.x2}" y2="${i.y2}" stroke="${i.stroke}" stroke-width="${i.sw||1}"/>`);
+      } else if(i.t==='text'){
+        const fam=(i.w>=600&&!(i.ls>0))?'Archivo, Helvetica, sans-serif':'IBM Plex Sans, Helvetica, sans-serif';
+        parts.push(`<text x="${i.x}" y="${i.y}" font-family="${fam}" font-size="${i.s}" font-weight="${i.w}" fill="${i.fill}" letter-spacing="${(i.ls||0).toFixed(2)}"${i.align==='center'?' text-anchor="middle"':''}>${esc(i.text)}</text>`);
+      }
+    }
+    parts.push('</svg>');
+    return parts.join('');
+  }
+
+  paintAll(){
+    const t=this.state.tab;
+    if(t==='kacheln'||t==='social'){
+      const b = t==='social' ? (k=>this.buildSocial(k)) : (k=>this.buildTile(k));
+      this.paint(this._main,b(this.state.f.ausgabe));
+      this.paint(this._c1,b('1080x1080'));
+      this.paint(this._c2,b('1200x627'));
+      this.paint(this._c3,b('1080x1350'));
+      this.paint(this._c4,b('1080x1920'));
+      if(t==='social'&&this._ser){
+        this._overflow=false;
+        this.slideDeck(this.state.f.ausgabe).forEach((s,i)=>{ if(this._ser[i]) this.paint(this._ser[i],this.buildSlide(this.state.f.ausgabe,s)); });
+        if(this._overflow&&this.state.message!=='Text passt nicht vollständig — bitte den Beitrag kürzen oder auf mehrere Zeilen aufteilen.')
+          this.setState({message:'Text passt nicht vollständig — bitte den Beitrag kürzen oder auf mehrere Zeilen aufteilen.',msgKind:'warn'});
+      }
+    } else if(t==='logo'){
+      this.paint(this._l1,this.buildLogo('signet'));
+      this.paint(this._l2,this.buildLogo('horizontal'));
+      this.paint(this._l3,this.buildLogo('kurz'));
+      this.paint(this._l4,this.buildLogo('favicon'));
+    } else if(t==='mail'){
+      const fr=this._frame;
+      if(fr&&fr.contentDocument){ const d=fr.contentDocument; d.open(); d.write(this.mailHTML()); d.close(); }
+    } else if(this._doc){
+      this._doc.innerHTML=this.docHTML();
+    }
+  }
+
+  /* ---------- E-Mail ---------- */
+  mailHTML(){
+    const f=this.state.f, v=VAR[f.variante]||VAR.herbst, ort=[f.titel,f.jahr].filter(Boolean).join(' ');
+    const date=this.dateLine(false), A=v.accent, AD=v.onDark;
+    const S="font-family:Arial,Helvetica,sans-serif";
+    const wrap = inner => `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>${esc(this.subject())}</title></head>
+<body style="margin:0;padding:0;background:#F2F4F8"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F2F4F8"><tr><td align="center" style="padding:0">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;background:#FFFFFF">${inner}
+<tr><td style="border-top:1px solid #E4E8EF;padding:22px 32px;${S};font-size:12px;line-height:1.7;color:${LAV}">
+${esc(ABS.name)} · ${esc(ABS.web)}<br>Sie erhalten diese Nachricht als Mitglied des Vereins. <a href="#" style="color:${LAV}">Abmelden</a></td></tr>
+</table></td></tr></table></body></html>`;
+
+    const head = (label,badge)=>`<tr><td style="background:${NAVY};padding:22px 32px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td style="${S};font-size:0"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="44" style="width:44px"><table role="presentation" width="44" height="44" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ${LAVL}"><tr><td align="center" valign="middle" style="${S};font-size:14px;font-weight:bold;color:#FFFFFF;letter-spacing:-0.2px">IA24</td></tr></table></td>
+<td style="padding-left:13px;${S};font-size:10px;letter-spacing:2.4px;color:${LAVL};font-weight:bold">${esc(label)}</td>
+</tr></table></td>
+${badge?`<td align="right" style="${S};font-size:9px;letter-spacing:1.8px;color:${AD};font-weight:bold"><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ${A}"><tr><td style="padding:7px 10px;${S};font-size:9px;letter-spacing:1.8px;color:${AD};font-weight:bold">${esc(badge)}</td></tr></table></td>`:''}
+</tr></table></td></tr>`;
+
+    const para = t=>esc(t).split('\n\n').map(p=>`<p style="margin:0 0 14px;${S};font-size:16px;line-height:1.65;color:${SLATE}">${p.replace(/\n/g,'<br>')}</p>`).join('');
+    const sign = `<p style="margin:26px 0 0;${S};font-size:16px;line-height:1.5;color:${SLATE}"><strong style="color:${NAVY}">${esc(f.signName)}</strong><br><span style="color:${LAV}">${esc(f.signFunktion)}</span></p>`;
+
+    if(f.mailTyp==='std'){
+      return wrap(head('KONFERENZEN',f.status)+
+      `<tr><td style="background:${NAVY};padding:8px 32px 46px">
+<div style="${S};font-size:11px;letter-spacing:2.6px;color:${LAVL};font-weight:bold;padding-bottom:14px">${esc(f.eventFormat.toUpperCase())}</div>
+<div style="${S};font-size:46px;line-height:1.05;color:#FFFFFF;font-weight:bold;letter-spacing:-0.5px">${esc(ort)}</div>
+<div style="height:18px;line-height:18px">&nbsp;</div><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="80" height="2" style="background:${A};font-size:0;line-height:0">&nbsp;</td></tr></table>
+<div style="${S};font-size:17px;color:#C7CEE4;padding-top:18px">${esc(date)}</div></td></tr>
+<tr><td style="padding:34px 32px 30px">${para(f.mailText)}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ${LINE};margin:6px 0 20px"><tr>
+<td width="50%" style="background:${LIGHT};padding:16px 20px;${S};font-size:15px;color:${NAVY};border-right:1px solid ${LINE}"><span style="font-size:10px;letter-spacing:1.8px;color:${LAV};font-weight:bold">TERMIN</span><br>${esc(date)}</td>
+<td width="50%" style="background:${LIGHT};padding:16px 20px;${S};font-size:15px;color:${NAVY}"><span style="font-size:10px;letter-spacing:1.8px;color:${LAV};font-weight:bold">ORT</span><br>${esc(f.titel)}</td>
+</tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:${A}"><a href="#" style="display:inline-block;padding:16px 26px;${S};font-size:16px;font-weight:bold;color:#FFFFFF;text-decoration:none">Termin in den Kalender</a></td></tr></table>
+${sign}</td></tr>`);
+    }
+
+    if(f.mailTyp==='einladung'){
+      const rows=String(f.programm).split('\n').filter(Boolean).map(l=>{const [a,b]=l.split('|');
+        return `<tr><td width="120" valign="top" style="padding:15px 20px 15px 0;border-bottom:1px solid #E4E8EF;${S};font-size:14px;font-weight:bold;color:${A}">${esc((a||'').trim())}</td><td valign="top" style="padding:15px 0;border-bottom:1px solid #E4E8EF;${S};font-size:15px;line-height:1.5;color:${SLATE}">${esc((b||'').trim())}</td></tr>`;}).join('');
+      return wrap(head('KONFERENZEN',f.status)+
+      `<tr><td style="padding:32px 32px 24px">
+<div style="${S};font-size:11px;letter-spacing:2.2px;color:${A};font-weight:bold;padding-bottom:12px">${esc(f.eventFormat.toUpperCase())} · ${esc(f.titel.toUpperCase())}</div>
+<div style="${S};font-size:34px;line-height:1.12;color:${NAVY};font-weight:bold;letter-spacing:-0.4px;padding-bottom:14px">${esc(ort)}</div>
+${para(f.mailText)}
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px"><tr><td style="background:${A}"><a href="#" style="display:inline-block;padding:16px 26px;${S};font-size:16px;font-weight:bold;color:#FFFFFF;text-decoration:none">Jetzt anmelden</a></td></tr></table></td></tr>
+<tr><td style="padding:0 32px 26px">
+<div style="${S};font-size:11px;letter-spacing:2px;color:${LAV};font-weight:bold;padding-bottom:12px;border-bottom:2px solid ${NAVY}">PROGRAMM IM ÜBERBLICK</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${rows}
+<tr><td width="120" valign="top" style="padding:15px 20px 15px 0;${S};font-size:14px;font-weight:bold;color:${A}">Anmeldung</td><td valign="top" style="padding:15px 0;${S};font-size:15px;color:${SLATE}">${esc(f.anmeldung)}</td></tr></table></td></tr>
+<tr><td style="padding:0 32px 32px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ${LINE};background:${LIGHT}"><tr><td style="padding:24px 26px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td style="${S};font-size:11px;letter-spacing:2px;color:${LAV};font-weight:bold">ZIMMERKONTINGENT</td>
+<td align="right" style="${S};font-size:12px;letter-spacing:1.4px;color:${A};font-weight:bold">ABRUFBAR BIS ${esc(f.hotelFrist)}</td></tr></table>
+<div style="${S};font-size:21px;line-height:1.25;color:${NAVY};font-weight:bold;padding:14px 0">${esc(f.hotelName)}</div>
+<div style="${S};font-size:15px;line-height:1.65;color:${SLATE};padding-bottom:16px">Für die Tagung sind <strong>${esc(f.hotelAnzahl)}</strong> zum Sonderpreis von ${esc(f.hotelPreis)} pro Nacht inklusive Frühstück reserviert. Buchung über den Link mit dem Stichwort <strong>IA24</strong>.</div>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:${BLUE}"><a href="${esc(f.hotelLink)}" style="display:inline-block;padding:14px 24px;${S};font-size:15px;font-weight:bold;color:#FFFFFF;text-decoration:none">Zimmer buchen</a></td></tr></table>
+<div style="${S};font-size:13px;line-height:1.5;color:${LAV};padding-top:14px">Nach dem ${esc(f.hotelFrist)} verfällt das Kontingent — danach gelten die regulären Tagespreise.</div>
+</td></tr></table>${sign}</td></tr>`);
+    }
+
+    if(f.mailTyp==='newsletter'){
+      const items=String(f.nlBeitraege).split('\n').filter(Boolean).map(l=>l.split('|').map(s=>(s||'').trim()));
+      const toc=items.map((p,i)=>`<div style="${S};font-size:15px;line-height:1.5;color:${BLUE};padding-bottom:8px">${String(i+1).padStart(2,'0')} · ${esc(p[1]||'')}</div>`).join('');
+      const body=items.map((p,i)=>`<tr><td style="padding:28px 32px;border-bottom:1px solid #E4E8EF">
+<div style="${S};font-size:11px;letter-spacing:2px;color:${LAV};font-weight:bold;padding-bottom:12px">${String(i+1).padStart(2,'0')} · ${esc((p[0]||'').toUpperCase())}</div>
+<div style="${S};font-size:23px;line-height:1.25;color:${NAVY};font-weight:bold;letter-spacing:-0.3px;padding-bottom:12px">${esc(p[1]||'')}</div>
+<div style="${S};font-size:16px;line-height:1.65;color:${SLATE}">${esc(p[2]||'')}</div></td></tr>`).join('');
+      return wrap(head('INTERN','')+
+      `<tr><td style="background:${NAVY};padding:0 32px 20px;${S};font-size:12px;color:#C7CEE4;letter-spacing:0.8px">Ausgabe ${esc(f.nlAusgabe)}</td></tr>
+<tr><td style="padding:30px 32px 22px;border-bottom:1px solid #E4E8EF">
+<div style="${S};font-size:25px;line-height:1.2;color:${NAVY};font-weight:bold;letter-spacing:-0.3px;padding-bottom:14px">In dieser Ausgabe</div>${toc}</td></tr>${body}`);
+    }
+
+    const to=String(f.tagesordnung).split('\n').filter(Boolean).map((l,i)=>`${i+1}. ${esc(l)}`).join('<br>');
+    return wrap(`<tr><td style="padding:24px 32px;border-bottom:2px solid ${NAVY}">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+<td width="40"><table role="presentation" width="40" height="40" cellpadding="0" cellspacing="0" border="0" style="background:${NAVY}"><tr><td align="center" valign="middle" style="${S};font-size:13px;font-weight:bold;color:#FFFFFF">IA24</td></tr></table></td>
+<td style="padding-left:13px;${S};font-size:11px;letter-spacing:1.8px;color:${NAVY};font-weight:bold">${esc(ABS.name.toUpperCase())}<br><span style="font-size:11px;letter-spacing:0.6px;color:${LAV};font-weight:normal">Mitteilung des Vorstands</span></td>
+</tr></table></td></tr>
+<tr><td style="padding:32px">
+<div style="${S};font-size:25px;line-height:1.22;color:${NAVY};font-weight:bold;letter-spacing:-0.3px;padding-bottom:18px">${esc(this.subject())}</div>
+${para(f.mailText)}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-left:3px solid ${BLUE};padding:4px 0 4px 20px">
+<div style="${S};font-size:11px;letter-spacing:2px;color:${LAV};font-weight:bold;padding-bottom:8px">TAGESORDNUNG</div>
+<div style="${S};font-size:15px;line-height:1.7;color:${SLATE}">${to}</div></td></tr></table>${sign}</td></tr>`);
+  }
+
+  /* ---------- Dokumente ---------- */
+  docHTML(){
+    const f=this.state.f, t=this.state.tab, v=VAR[f.variante]||VAR.herbst;
+    const S="font-family:'IBM Plex Sans',Helvetica,sans-serif";
+    const AR="font-family:Archivo,Helvetica,sans-serif;font-weight:600;letter-spacing:-0.01em";
+    const sig=(e,ac,fs)=>`<div style="width:${e}mm;height:${e}mm;background:${NAVY};position:relative;flex:none;display:flex;align-items:center;justify-content:center">
+<div style="font-family:Archivo,Helvetica,sans-serif;font-weight:700;letter-spacing:-0.01em;font-size:${fs}pt;color:#FFFFFF;line-height:1;padding-bottom:${e*0.1}mm">IA24</div>
+<div style="position:absolute;left:${e*0.2}mm;bottom:${e*0.28}mm;width:${e*0.6}mm;height:0.4mm;background:${ac};transform:rotate(-8deg);transform-origin:left center"></div></div>`;
+    const footer=`<div style="margin-top:auto;border-top:0.5pt solid ${LINE};padding-top:3mm;display:flex;gap:8mm;${S};font-size:6.8pt;line-height:1.6;color:${LAV}">
+<div style="flex:1"><strong style="color:${SLATE}">Vorstand</strong><br>${esc(f.signName)}</div>
+<div style="flex:1"><strong style="color:${SLATE}">Register</strong><br>Amtsgericht Nürnberg<br>VR 00000</div>
+<div style="flex:1"><strong style="color:${SLATE}">Bankverbindung</strong><br>Musterbank eG<br>IBAN DE00 0000 0000 0000 0000 00</div>
+<div style="flex:1"><strong style="color:${SLATE}">Kontakt</strong><br>${ABS.web}<br>${ABS.hotline}</div></div>`;
+
+    if(t==='karte'){
+      return `<div style="width:210mm;height:297mm;padding:20mm;${S};color:${NAVY};display:flex;flex-direction:column;gap:10mm">
+<div style="${AR};font-size:18pt">Visitenkarte · 85 × 55 mm</div>
+<div style="display:flex;gap:8mm;flex-wrap:wrap">
+<div style="width:85mm;height:55mm;border:0.5pt solid ${LINE};padding:8mm;display:flex;flex-direction:column;justify-content:space-between">
+${sig(13,v.accent,12)}
+<div><div style="font-size:10pt;font-weight:600">${esc(f.pName)}</div>
+<div style="font-size:8pt;color:${LAV};padding-top:1.5mm">${esc(f.pFunktion)}</div>
+<div style="font-size:7.5pt;color:${SLATE};line-height:1.6;padding-top:2mm">T ${esc(f.pTel)} · ${esc(f.pMail)}</div></div></div>
+<div style="width:85mm;height:55mm;background:${NAVY};padding:8mm;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden">
+<div style="position:absolute;left:-10mm;bottom:24mm;width:110mm;height:0.4mm;background:${v.accent};transform:rotate(-8deg);transform-origin:left center"></div>
+<div style="${AR};font-size:15pt;color:#FFFFFF;line-height:1.15;position:relative">Insolvenzanwalt 24<span style="color:${LAVL}"> e. V.</span></div>
+<div style="font-size:7.5pt;color:#C7CEE4;line-height:1.7;position:relative">${ABS.strasse} · ${ABS.ort}<br>${ABS.web} · ${ABS.hotline}</div></div></div>
+<div style="font-size:9pt;line-height:1.6;color:${SLATE};max-width:150mm">Druck 350&nbsp;g Naturpapier, ungestrichen. Signet in Navy, Signaturlinie in Kupfer. Keine Lackierung, keine Rundungen.</div></div>`;
+    }
+
+    if(t==='sig'){
+      return `<div style="width:210mm;padding:20mm;${S};color:${NAVY};display:flex;flex-direction:column;gap:8mm">
+<div style="${AR};font-size:18pt">E-Mail-Signatur</div>
+<div style="border:0.5pt solid ${LINE};padding:6mm 7mm;display:flex;align-items:center;gap:6mm">
+${sig(14,v.accent,13)}
+<div style="border-left:0.5pt solid ${LINE};padding-left:6mm;font-size:9pt;line-height:1.6;color:${SLATE}">
+<strong style="color:${NAVY}">${esc(f.pName)}</strong> · ${esc(f.pFunktion)}<br>
+${ABS.name} · ${ABS.strasse} · ${ABS.ort}<br>
+T ${esc(f.pTel)} · <span style="color:${BLUE}">${esc(f.pMail)}</span><br>
+<span style="color:${BLUE}">${ABS.web}</span></div></div>
+<div style="font-size:9pt;line-height:1.6;color:${SLATE};max-width:150mm">Kein Bildbanner, keine farbigen Zitate, keine wechselnden Veranstaltungshinweise — Tagungen werden über eine eigene Mail angekündigt.</div></div>`;
+    }
+
+    if(t==='cert'){
+      return `<div style="width:210mm;height:148mm;padding:16mm;${S};color:${NAVY};display:flex;flex-direction:column;justify-content:space-between">
+<div style="display:flex;justify-content:space-between;align-items:flex-start">
+${sig(14,v.accent,13)}
+<div style="font-size:7pt;letter-spacing:0.18em;text-transform:uppercase;color:${LAV};font-weight:600">§ 15 FAO</div></div>
+<div>
+<div style="width:18mm;height:0.6mm;background:${v.accent};margin-bottom:3mm"></div>
+<div style="${AR};font-size:22pt;line-height:1.1">Teilnahmebescheinigung</div>
+<div style="font-size:11pt;line-height:1.7;color:${SLATE};padding-top:5mm;max-width:150mm">
+${esc(f.teilnehmer)} hat an der ${esc(f.eventFormat)} des Vereins ${ABS.name} in ${esc(f.titel)} vom ${esc(this.dateLine(false))} teilgenommen.
+Die Veranstaltung umfasste ${esc(f.stunden)} Zeitstunden im Sinne des § 15 FAO.</div></div>
+<div style="display:flex;justify-content:space-between;align-items:flex-end">
+<div style="font-size:9pt;color:${LAV}">${esc(f.certOrt)}, ${esc(f.briefDatum)}</div>
+<div style="border-top:0.3pt solid ${LINE};padding-top:2mm;font-size:9pt;color:${SLATE};min-width:60mm;text-align:right">
+<strong style="color:${NAVY}">${esc(f.signName)}</strong><br><span style="color:${LAV}">${esc(f.signFunktion)}</span></div></div></div>`;
+    }
+
+    if(f.briefArt==='kurz'){
+      return `<div style="width:210mm;height:148mm;padding:14mm 16mm;${S};color:${NAVY};display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;gap:4mm;border-bottom:0.5pt solid ${NAVY};padding-bottom:3mm">
+${sig(10,v.accent,9)}
+<div style="font-size:9pt;letter-spacing:0.16em;text-transform:uppercase;font-weight:600">Kurzmitteilung</div></div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:2.5mm 6mm;font-size:8.5pt;color:${LAV};margin-top:6mm">
+<div>An</div><div style="border-bottom:0.3pt solid #E4E8EF;color:${SLATE}">${esc(String(f.empfaenger).split('\n')[0]||'')}</div>
+<div>Von</div><div style="border-bottom:0.3pt solid #E4E8EF;color:${SLATE}">${esc(f.signName)}</div>
+<div>Datum</div><div style="border-bottom:0.3pt solid #E4E8EF;color:${SLATE}">${esc(f.briefDatum)}</div></div>
+<div style="margin-top:7mm;font-size:10.5pt;line-height:1.7;color:${SLATE};white-space:pre-wrap">${esc(f.briefText)}</div></div>`;
+    }
+
+    const lines=String(f.empfaenger).split('\n').map(esc).join('<br>');
+    return `<div style="width:210mm;height:297mm;padding:15mm 20mm 15mm 25mm;${S};color:${NAVY};display:flex;flex-direction:column;position:relative">
+<div style="position:absolute;left:0;top:105mm;width:5mm;height:0.3mm;background:${LAVL}"></div>
+<div style="position:absolute;left:0;top:148.5mm;width:8mm;height:0.3mm;background:${LAVL}"></div>
+<div style="position:absolute;left:0;top:210mm;width:5mm;height:0.3mm;background:${LAVL}"></div>
+<div style="display:flex;justify-content:space-between;align-items:flex-start">
+<div style="display:flex;align-items:center;gap:5mm">${sig(17,v.accent,16)}
+<div><div style="${AR};font-size:14pt;line-height:1">Insolvenzanwalt 24<span style="color:${LAV}"> e. V.</span></div>
+<div style="font-size:7pt;letter-spacing:0.2em;text-transform:uppercase;color:${LAV};padding-top:1.2mm">Verein für Insolvenzrecht</div></div></div>
+<div style="text-align:right;font-size:8pt;line-height:1.7;color:${LAV}">Geschäftsstelle<br>${ABS.strasse} · ${ABS.ort}<br>T ${ABS.tel}<br>${ABS.mail}</div></div>
+<div style="display:flex;gap:10mm;margin-top:10.8mm">
+<div style="width:85mm;flex:none;height:40mm">
+<div style="font-size:6.5pt;color:${LAV};border-bottom:0.3pt solid ${LINE};padding-bottom:1.5mm;margin-bottom:4mm">${ABS.name} · ${ABS.strasse} · ${ABS.ort}</div>
+<div style="font-size:11pt;line-height:1.5">${lines}</div></div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:40mm">
+<div style="display:grid;grid-template-columns:auto 1fr;gap:1.8mm 6mm;font-size:8.5pt;line-height:1.4">
+<div style="color:${LAV}">Unser Zeichen</div><div style="color:${SLATE}">${esc(f.zeichen)}</div>
+<div style="color:${LAV}">Ansprechpartner</div><div style="color:${SLATE}">Geschäftsstelle</div>
+<div style="color:${LAV}">Datum</div><div style="color:${NAVY};font-weight:600">${esc(f.briefDatum)}</div></div></div></div>
+<div style="margin-top:14mm;display:flex;flex-direction:column;gap:6mm">
+<div style="font-size:11pt;font-weight:600">${esc(f.briefBetreff)}</div>
+<div style="font-size:10.5pt;line-height:1.65;color:${SLATE};white-space:pre-wrap">${esc(f.briefText)}</div>
+<div style="height:16mm"></div>
+<div style="font-size:10.5pt;line-height:1.5;color:${SLATE}"><strong style="color:${NAVY}">${esc(f.signName)}</strong><br>${esc(f.signFunktion)}</div>
+${f.anlagen?`<div style="font-size:9pt;color:${LAV};margin-top:4mm">Anlagen: ${esc(f.anlagen)}</div>`:''}</div>
+${footer}</div>`;
+  }
+
+  /* ---------- Ausgabe ---------- */
+  fileBase(){
+    const f=this.state.f;
+    return ('IA24-'+[f.eventFormat,f.titel,f.jahr].filter(Boolean).join('-')).replace(/[^A-Za-z0-9\-]+/g,'-').replace(/-+/g,'-');
+  }
+  dl(blob,name){
+    const url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+  }
+  msg(text,kind){ this.setState({message:text,msgKind:kind||'ok'}); }
+
+  pngFromSpec(spec,name,scale){
+    const c=document.createElement('canvas');
+    const s=scale||1;
+    const big={W:spec.W*s,H:spec.H*s,items:spec.items.map(i=>{
+      const o={...i};
+      ['x','y','w','h','x1','y1','x2','y2','s','ls','sw'].forEach(k=>{ if(typeof o[k]==='number') o[k]=o[k]*s; });
+      return o;
+    })};
+    this.paint(c,big);
+    c.toBlob(b=>{ this.dl(b,name); this.msg(name+' wurde heruntergeladen.'); },'image/png');
+  }
+
+  async copyHTML(html){
+    try{
+      if(navigator.clipboard&&window.ClipboardItem){
+        await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([html],{type:'text/plain'})})]);
+      } else { await navigator.clipboard.writeText(html); }
+      this.msg('In die Zwischenablage kopiert — im Mailtool als HTML einfügen.');
+    }catch(e){ this.msg('Kopieren wurde vom Browser abgelehnt. Bitte die Datei herunterladen und im Mailtool importieren.','warn'); }
+  }
+  emlBlob(){
+    const subj=this.subject(), html=this.mailHTML();
+    const b64=btoa(unescape(encodeURIComponent(html)));
+    const enc='=?UTF-8?B?'+btoa(unescape(encodeURIComponent(subj)))+'?=';
+    const msg=['MIME-Version: 1.0','Subject: '+enc,'X-Unsent: 1','Content-Type: text/html; charset=UTF-8','Content-Transfer-Encoding: base64','',b64].join('\r\n');
+    return new Blob([msg],{type:'message/rfc822'});
+  }
+
+  renderVals(){
+    const f=this.state.f, tab=this.state.tab;
+    const tabStyle = id => `background:${id===tab?'#FFFFFF':'transparent'}; color:${id===tab?NAVY:LAV}; border:0; border-bottom:3px solid ${id===tab?COP:'transparent'}; padding:15px 18px; font-size:14px; font-weight:${id===tab?600:400}; white-space:nowrap`;
+    const btn = (kind) => kind==='primary'
+      ? `background:${COP}; color:#FFFFFF; border:0; padding:13px 18px; font-size:14px; font-weight:600; text-align:left`
+      : `background:#FFFFFF; color:${BLUE}; border:1px solid #C7CEE4; padding:13px 18px; font-size:14px; font-weight:500; text-align:left`;
+
+    const acts=[];
+    if(tab==='kacheln'){
+      acts.push({id:'png',label:'PNG dieses Formats herunterladen',style:btn('primary')});
+      acts.push({id:'pngAll',label:'Alle vier Formate als PNG',style:btn()});
+      acts.push({id:'svg',label:'SVG dieses Formats',style:btn()});
+    } else if(tab==='social'){
+      acts.push({id:'png',label:'PNG dieses Formats herunterladen',style:btn('primary')});
+      acts.push({id:'pngAll',label:'Alle vier Formate als PNG',style:btn()});
+      if(this.serieLines().length) acts.push({id:'pngSerie',label:'Karussell als PNG-Serie ('+this.slideDeck(f.ausgabe).length+' Kacheln)',style:btn()});
+      acts.push({id:'copyText',label:'Begleittext in die Zwischenablage',style:btn()});
+    } else if(tab==='mail'){
+      acts.push({id:'copy',label:'HTML in die Zwischenablage',style:btn('primary')});
+      acts.push({id:'eml',label:'Mail-Datei herunterladen (.eml)',style:btn()});
+      acts.push({id:'outlook',label:'Direkt in Outlook öffnen',style:btn()});
+      acts.push({id:'html',label:'HTML-Datei speichern',style:btn()});
+    } else if(tab==='sig'){
+      acts.push({id:'copySig',label:'Signatur in die Zwischenablage',style:btn('primary')});
+      acts.push({id:'print',label:'Als PDF drucken',style:btn()});
+    } else if(tab==='logo'){
+      acts.push({id:'logoSvg',label:'Alle vier als SVG',style:btn('primary')});
+      acts.push({id:'logoPng',label:'Alle vier als PNG (4×)',style:btn()});
+    } else {
+      acts.push({id:'print',label:'Als PDF drucken',style:btn('primary')});
+    }
+
+    const notes={
+      kacheln:'Alle vier Formate entstehen aus denselben Eingaben und werden je Format eigens komponiert.',
+      social:'Zehn Kacheltypen für Beiträge ohne Veranstaltungsbezug. Bild optional, Karussell möglich.',
+      mail:'Der Quelltext ist auf Outlook ausgelegt: Tabellen, feste Farben, keine Drehungen.',
+      brief:'Satzspiegel nach DIN 5008 mit Falz- und Lochmarken, Anschriftfeld für Fensterumschlag DIN lang.',
+      cert:'Wird nach jeder Tagung ausgegeben. Stundenzahl immer als Ziffer im Fließtext.',
+      karte:'Vorder- und Rückseite auf einem Bogen, 85 × 55 mm.',
+      sig:'Vier Zeilen, kein Bildbanner. Für Outlook, Apple Mail und Webmail identisch.',
+      logo:'PNG in vierfacher Auflösung, SVG als Vorlage für Druck und Fremddienstleister.'
+    };
+    const titles={kacheln:'Veranstaltungskacheln',social:'Social-Kacheln',mail:'E-Mails an Mitglieder',brief:'Briefbogen',cert:'Teilnahmebescheinigung',karte:'Visitenkarte',sig:'E-Mail-Signatur',logo:'Logo-Dateien'};
+
+    return {
+      tabs: TABS.map(t=>({...t, style:tabStyle(t.id)})),
+      actions: acts,
+      f,
+      isTiles: tab==='kacheln',
+      isSocial: tab==='social',
+      isTileLike: tab==='kacheln'||tab==='social',
+      hasSerie: tab==='social' && this.serieLines().length>0,
+      serieItems: this.slideDeck(f.ausgabe).map((s,i)=>({ i, nr: s.kind==='cover'?'Titelkachel':(s.kind==='fazit'?'Fazit':'Beitrag '+String(i).padStart(2,'0')+(s.cont?' · Fortsetzung':'')), ref: el=>{ this._ser=this._ser||[]; this._ser[i]=el; } })),
+      socialTypes: Object.keys(SOCIAL).map(k=>({ id:k, label:SOCIAL[k].label })),
+      captionText: this.caption(),
+      onDrop: e=>{ e.preventDefault(); const dt=e.dataTransfer; if(dt&&dt.files&&dt.files[0]) this.loadImage(dt.files[0]); },
+      onDragOver: e=>{ e.preventDefault(); },
+      onPick: e=>{ const fl=e.currentTarget.files; if(fl&&fl[0]) this.loadImage(fl[0]); },
+      bildName: this._img?'Bild geladen':'Noch kein Bild',
+      isMail: tab==='mail',
+      isBrief: tab==='brief',
+      isCert: tab==='cert',
+      isPerson: tab==='karte'||tab==='sig',
+      isLogo: tab==='logo',
+      isDoc: tab==='brief'||tab==='cert'||tab==='karte'||tab==='sig',
+      hasEvent: tab==='kacheln'||tab==='mail'||tab==='cert',
+      isNewsletter: f.mailTyp==='newsletter',
+      isEinladung: f.mailTyp==='einladung',
+      isRundmail: f.mailTyp==='rundmail',
+      panelKicker: 'Eingaben',
+      panelTitle: titles[tab],
+      panelNote: notes[tab],
+      datumAuto: this.dateLine(false),
+      betreffAuto: this.subject(),
+      betreffFinal: this.subject(),
+      message: this.state.message,
+      msgColor: this.state.msgKind==='warn'?COP:LAV,
+      saveHint: this.state.saved?'Eingaben lokal gespeichert':'',
+      mainCanvas: el=>{this._main=el;},
+      c1: el=>{this._c1=el;}, c2: el=>{this._c2=el;}, c3: el=>{this._c3=el;}, c4: el=>{this._c4=el;},
+      l1: el=>{this._l1=el;}, l2: el=>{this._l2=el;}, l3: el=>{this._l3=el;}, l4: el=>{this._l4=el;},
+      mailFrame: el=>{this._frame=el;},
+      docHost: el=>{this._doc=el;},
+      onTab: e=>{ this.setState({tab:e.currentTarget.getAttribute('data-tab'),message:''}); },
+      onField: e=>{ const t=e.currentTarget; this.set(t.getAttribute('name'), t.value); },
+      onSocialTyp: e=>{ const id=e.currentTarget.value, p=SOCIAL[id]||SOCIAL.leitsatz;
+        const bm = (id==='vorstellung'||id==='rueckblick') ? 'oben' : this.state.f.sBildMode;
+        const nf={...this.state.f, sTyp:id, sKicker:p.kicker, sBig:p.big, sSub:p.sub, sFl:p.fl, sFr:p.fr, sBildMode:bm};
+        this.setState({f:nf,message:''}); this.save(nf); },
+      onReset: ()=>{ this.setState({f:{...DEFAULTS},message:'Beispieldaten geladen.',msgKind:'ok'}); this.save({...DEFAULTS}); },
+      onAction: e=>{
+        const a=e.currentTarget.getAttribute('data-act');
+        try{
+          const soc = tab==='social';
+          const base = soc ? ('IA24-'+f.sTyp) : this.fileBase();
+          const mk = k => soc ? this.buildSocial(k) : this.buildTile(k);
+          if(a==='png') this.pngFromSpec(mk(f.ausgabe), `${base}-${f.ausgabe}.png`,1);
+          else if(a==='pngAll'){ Object.keys(SIZES).forEach((k,i)=>setTimeout(()=>this.pngFromSpec(mk(k),`${base}-${k}.png`,1),i*350)); this.msg('Vier PNG-Dateien werden erzeugt.'); }
+          else if(a==='pngSerie'){ const sl=this.slideDeck(f.ausgabe); sl.forEach((s,i)=>setTimeout(()=>this.pngFromSpec(this.buildSlide(f.ausgabe,s),`${base}-karussell-${String(i+1).padStart(2,'0')}.png`,1),i*350)); this.msg(sl.length+' Kacheln werden erzeugt.'); }
+          else if(a==='copyText'){ navigator.clipboard.writeText(this.caption()).then(()=>this.msg('Begleittext kopiert.'),()=>this.msg('Kopieren wurde abgelehnt.','warn')); }
+          else if(a==='svg'){ this.dl(new Blob([this.toSVG(this.buildTile(f.ausgabe))],{type:'image/svg+xml'}), `${this.fileBase()}-${f.ausgabe}.svg`); this.msg('SVG heruntergeladen. Schriften müssen beim Empfänger installiert sein.'); }
+          else if(a==='copy') this.copyHTML(this.mailHTML());
+          else if(a==='eml'||a==='outlook'){ this.dl(this.emlBlob(), `${this.fileBase()}-${f.mailTyp}.eml`); this.msg(a==='outlook'?'Die .eml-Datei öffnet sich in Outlook als unversendeter Entwurf.':'Mail-Datei heruntergeladen.'); }
+          else if(a==='html'){ this.dl(new Blob([this.mailHTML()],{type:'text/html'}), `${this.fileBase()}-${f.mailTyp}.html`); this.msg('HTML-Datei gespeichert.'); }
+          else if(a==='copySig') this.copyHTML(this.docHTML());
+          else if(a==='print'){ this.msg('Im Druckdialog „Als PDF speichern“ wählen, Ränder auf „Keine“.'); setTimeout(()=>window.print(),120); }
+          else if(a==='logoSvg'){ ['signet','horizontal','kurz','favicon'].forEach((k,i)=>setTimeout(()=>this.dl(new Blob([this.toSVG(this.buildLogo(k))],{type:'image/svg+xml'}),`IA24-${k}-${f.logoGrund}.svg`),i*250)); this.msg('Vier SVG-Dateien werden erzeugt.'); }
+          else if(a==='logoPng'){ ['signet','horizontal','kurz','favicon'].forEach((k,i)=>setTimeout(()=>this.pngFromSpec(this.buildLogo(k),`IA24-${k}-${f.logoGrund}@4x.png`,4),i*350)); this.msg('Vier PNG-Dateien werden erzeugt.'); }
+        }catch(err){ this.msg('Das hat nicht funktioniert: '+err.message,'warn'); }
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
