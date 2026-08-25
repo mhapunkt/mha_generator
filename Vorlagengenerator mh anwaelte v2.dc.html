@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="omelette-owns-print" content="1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:#E4E5E7; font-family:'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; color:#333333; }
+  a { color:#FF5900; text-decoration:none; }
+  a:hover { color:#333333; }
+  input, textarea, select, button { font-family:'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+  textarea { line-height:1.5; }
+  @page { size: A4 landscape; margin: 0; }
+  @media print {
+    html, body { background:#FFFFFF !important; }
+    [data-noprint] { display:none !important; }
+    [data-app] { display:block !important; height:auto !important; }
+    [data-preview] { overflow:visible !important; padding:0 !important; background:#FFFFFF !important; height:auto !important; }
+    [data-scaler] { position:static !important; transform:none !important; }
+    [data-sheetframe] { height:auto !important; }
+    [data-sheet] { margin:0 !important; box-shadow:none !important; border:0 !important; }
+  }
+</style>
+</helmet>
+
+<div data-app="1" style="display:flex; flex-direction:column; height:100vh; min-height:0; background:#E4E5E7;">
+
+  <div data-noprint="1" style="flex:0 0 auto; background:#FFFFFF; border-bottom:4px solid #FF5900; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; gap:24px;">
+    <div style="display:flex; align-items:center; gap:18px;">
+      <img src="assets/mh-logo-dreizeiler.png" alt="mh anwälte" style="display:block; width:104px; height:auto;">
+      <div style="display:flex; flex-direction:column; gap:3px; border-left:1px solid #E2E3E5; padding-left:18px;">
+        <div style="font-size:15px; font-weight:700; color:#333333;">Vorlagengenerator</div>
+        <div style="font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase; color:#FF5900; font-weight:700;">mh anwälte Rechtsanwaltsgesellschaft mbH</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; align-items:center;">
+      <div style="font-size:11px; color:#A9B0B6; letter-spacing:0.04em;">{{ saveHint }}</div>
+      <button type="button" onClick="{{ onReset }}" style="background:transparent; color:#616161; border:1px solid #CFD2D5; padding:9px 16px; font-size:12.5px; cursor:pointer;">Beispieldaten laden</button>
+    </div>
+  </div>
+
+  <div data-noprint="1" style="flex:0 0 auto; background:#FFFFFF; border-bottom:1px solid #E2E3E5; padding:0 20px; display:flex; gap:2px; overflow-x:auto;">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="8">
+      <button type="button" data-tab="{{ t.id }}" onClick="{{ onTab }}" style="background:transparent; border:0; padding:14px 16px 0 16px; font-size:13.5px; font-weight:700; color:#616161; cursor:pointer; white-space:nowrap; display:flex; flex-direction:column; align-items:center; gap:11px;">
+        {{ t.label }}
+        <sc-if value="{{ t.active }}" hint-placeholder-val="{{ false }}"><span style="display:block; width:100%; height:3px; background:#FF5900;"></span></sc-if>
+        <sc-if value="{{ t.idle }}" hint-placeholder-val="{{ true }}"><span style="display:block; width:100%; height:3px; background:transparent;"></span></sc-if>
+      </button>
+    </sc-for>
+  </div>
+
+  <div style="flex:1 1 auto; min-height:0; display:flex; align-items:stretch;">
+
+    <div data-noprint="1" style="flex:0 0 400px; background:#F8F8F8; border-right:1px solid #E2E3E5; overflow-y:auto; padding:22px 22px 60px 22px; display:flex; flex-direction:column; gap:20px;">
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div style="font-size:10.5px; letter-spacing:0.2em; text-transform:uppercase; color:#FF5900; font-weight:700;">{{ panelKicker }}</div>
+        <div style="font-size:22px; font-weight:700; line-height:1.15; letter-spacing:-0.3px; color:#333333;">{{ panelTitle }}</div>
+        <div style="font-size:12.5px; line-height:1.55; color:#616161;">{{ panelNote }}</div>
+      </div>
+
+      <sc-if value="{{ hasEvent }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column; gap:12px; border-top:1px solid #E2E3E5; padding-top:18px;">
+          <div style="font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase; color:#616161; font-weight:700;">Veranstaltung</div>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Anlass / Kicker</span>
+            <input name="kicker" value="{{ f.kicker }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+          </label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Titel Zeile 1</span>
+              <input name="titel1" value="{{ f.titel1 }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Titel Zeile 2</span>
+              <input name="titel2" value="{{ f.titel2 }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+            </label>
+          </div>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Untertitel</span>
+            <input name="untertitel" value="{{ f.untertitel }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+          </label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Ort / Location</span>
+              <input name="venue" value="{{ f.venue }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Stadt</span>
+              <input name="stadt" value="{{ f.stadt }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+            </label>
+          </div>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Adresse</span>
+            <input name="adresse" value="{{ f.adresse }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Fortbildungshinweis</span>
+            <input name="fao" value="{{ f.fao }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Tage · Datum | Monat | Wochentag | Uhrzeit | Kurztitel | Zusammenfassung</span>
+            <textarea name="tage" value="{{ f.tage }}" onInput="{{ onField }}" rows="4" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12px; color:#333333; resize:vertical;"></textarea>
+          </label>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isEinladung }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column; gap:12px; border-top:1px solid #E2E3E5; padding-top:18px;">
+          <div style="font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase; color:#616161; font-weight:700;">Dokument</div>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Umfang</span>
+            <select name="docArt" value="{{ f.docArt }}" onChange="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+              <option value="save">Save the Date · 1 Seite</option>
+              <option value="voll">Einladung · Deckblatt, Einleitung, Programm, Logistik</option>
+            </select>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Hinweiszeile</span>
+            <textarea name="hinweis" value="{{ f.hinweis }}" onInput="{{ onField }}" rows="2" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333; resize:vertical;"></textarea>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Einleitungstext</span>
+            <textarea name="intro" value="{{ f.intro }}" onInput="{{ onField }}" rows="5" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333; resize:vertical;"></textarea>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Programm · Tag | Zeit | Titel | Referent | Unterpunkte mit ; getrennt · „~" vor dem Titel markiert eine Pause</span>
+            <textarea name="programm" value="{{ f.programm }}" onInput="{{ onField }}" rows="7" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12px; color:#333333; resize:vertical;"></textarea>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Logistik · Rubrik | Zeile / Zeile / Zeile</span>
+            <textarea name="logistik" value="{{ f.logistik }}" onInput="{{ onField }}" rows="4" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12px; color:#333333; resize:vertical;"></textarea>
+          </label>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSocial }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:12px; border-top:1px solid #E2E3E5; padding-top:18px;">
+          <div style="font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase; color:#616161; font-weight:700;">Kachel</div>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Inhalt</span>
+            <select name="sTyp" value="{{ f.sTyp }}" onChange="{{ onPreset }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+              <sc-for list="{{ socialTypes }}" as="o" hint-placeholder-count="6">
+                <option value="{{ o.id }}">{{ o.label }}</option>
+              </sc-for>
+            </select>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Format der großen Vorschau</span>
+            <select name="ausgabe" value="{{ f.ausgabe }}" onChange="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+              <option value="1080x1080">1080 × 1080 · Feed</option>
+              <option value="1200x627">1200 × 627 · Link</option>
+              <option value="1080x1350">1080 × 1350 · Hochformat</option>
+              <option value="1080x1920">1080 × 1920 · Story</option>
+            </select>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Kicker</span>
+            <input name="sKicker" value="{{ f.sKicker }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Aussage</span>
+            <textarea name="sBig" value="{{ f.sBig }}" onInput="{{ onField }}" rows="3" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333; resize:vertical;"></textarea>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Unterzeile</span>
+            <textarea name="sSub" value="{{ f.sSub }}" onInput="{{ onField }}" rows="2" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333; resize:vertical;"></textarea>
+          </label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Fußzeile links</span>
+              <input name="sFl" value="{{ f.sFl }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333;">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Fußzeile rechts</span>
+              <input name="sFr" value="{{ f.sFr }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333;">
+            </label>
+          </div>
+          <sc-if value="{{ isPromptTyp }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:10px; background:#FFFFFF; border:1px solid #E2E3E5; padding:14px;">
+              <div style="font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#616161; font-weight:700;">Prompt der Woche</div>
+              <label style="display:flex; flex-direction:column; gap:5px;">
+                <span style="font-size:11.5px; color:#616161;">Werkzeug · Etikett über dem Titel</span>
+                <input name="sModell" value="{{ f.sModell }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333;">
+              </label>
+              <label style="display:flex; flex-direction:column; gap:5px;">
+                <span style="font-size:11.5px; color:#616161;">Prompt-Text · nur bei „Prompt der Woche"</span>
+                <textarea name="sPromptText" value="{{ f.sPromptText }}" onInput="{{ onField }}" rows="5" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12px; color:#333333; resize:vertical; font-family:'IBM Plex Mono', ui-monospace, monospace;"></textarea>
+              </label>
+              <label style="display:flex; flex-direction:column; gap:5px;">
+                <span style="font-size:11.5px; color:#616161;">Datenschutz-Zeile</span>
+                <textarea name="sWarn" value="{{ f.sWarn }}" onInput="{{ onField }}" rows="2" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12px; color:#333333; resize:vertical;"></textarea>
+              </label>
+            </div>
+          </sc-if>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Hashtags für den Begleittext</span>
+            <input name="sTags" value="{{ f.sTags }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333;">
+          </label>
+          <div style="display:flex; flex-direction:column; gap:10px; background:#FFFFFF; border:1px solid #E2E3E5; padding:14px;">
+            <div style="font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#616161; font-weight:700;">Karussell</div>
+            <div style="font-size:12px; line-height:1.5; color:#616161;">Kachel 01 ist die Titelkachel. Darunter je Zeile eine Beitragskachel „Titel | Text", am Ende die Fazitkachel. Feld leeren heißt: keine Serie.</div>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Beiträge · Titel | Text</span>
+              <textarea name="sSerie" value="{{ f.sSerie }}" onInput="{{ onField }}" rows="6" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12px; color:#333333; resize:vertical;"></textarea>
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Fazit-Überschrift</span>
+              <input name="sFazitTitel" value="{{ f.sFazitTitel }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333;">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Fazit</span>
+              <textarea name="sFazit" value="{{ f.sFazit }}" onInput="{{ onField }}" rows="3" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12px; color:#333333; resize:vertical;"></textarea>
+            </label>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isMail }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:12px; border-top:1px solid #E2E3E5; padding-top:18px;">
+          <div style="font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase; color:#616161; font-weight:700;">Mail</div>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Anlass</span>
+            <select name="mailTyp" value="{{ f.mailTyp }}" onChange="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+              <option value="save">Save the Date</option>
+              <option value="einladung">Einladung mit Programm</option>
+              <option value="rund">Mandanten-Rundschreiben</option>
+            </select>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Betreff · leer = automatisch</span>
+            <input name="mailBetreff" value="{{ f.mailBetreff }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Anrede</span>
+            <input name="mailAnrede" value="{{ f.mailAnrede }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Text</span>
+            <textarea name="mailText" value="{{ f.mailText }}" onInput="{{ onField }}" rows="8" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333; resize:vertical;"></textarea>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Handlungsaufforderung</span>
+            <input name="mailCta" value="{{ f.mailCta }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+          </label>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isBrief }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:12px; border-top:1px solid #E2E3E5; padding-top:18px;">
+          <div style="font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase; color:#616161; font-weight:700;">Brief</div>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Empfänger</span>
+            <textarea name="empfaenger" value="{{ f.empfaenger }}" onInput="{{ onField }}" rows="4" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333; resize:vertical;"></textarea>
+          </label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Aktenzeichen</span>
+              <input name="zeichen" value="{{ f.zeichen }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333;">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Datum</span>
+              <input name="briefDatum" value="{{ f.briefDatum }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333;">
+            </label>
+          </div>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Betreff</span>
+            <input name="briefBetreff" value="{{ f.briefBetreff }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Text</span>
+            <textarea name="briefText" value="{{ f.briefText }}" onInput="{{ onField }}" rows="9" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333; resize:vertical;"></textarea>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Anlagen</span>
+            <input name="anlagen" value="{{ f.anlagen }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333;">
+          </label>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCert }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:12px; border-top:1px solid #E2E3E5; padding-top:18px;">
+          <div style="font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase; color:#616161; font-weight:700;">Bescheinigung</div>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Teilnehmerin oder Teilnehmer</span>
+            <input name="teilnehmer" value="{{ f.teilnehmer }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+          </label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Zeitstunden</span>
+              <input name="stunden" value="{{ f.stunden }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333;">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Ausstellungsort</span>
+              <input name="certOrt" value="{{ f.certOrt }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333;">
+            </label>
+          </div>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Unterzeichnung</span>
+            <input name="pName" value="{{ f.pName }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333;">
+          </label>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPerson }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:12px; border-top:1px solid #E2E3E5; padding-top:18px;">
+          <div style="font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase; color:#616161; font-weight:700;">Person</div>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Name</span>
+            <input name="pName" value="{{ f.pName }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11.5px; color:#616161;">Funktion</span>
+            <input name="pFunktion" value="{{ f.pFunktion }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:13px; color:#333333;">
+          </label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">Telefon</span>
+              <input name="pTel" value="{{ f.pTel }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333;">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+              <span style="font-size:11.5px; color:#616161;">E-Mail</span>
+              <input name="pMail" value="{{ f.pMail }}" onInput="{{ onField }}" style="width:100%; padding:9px 10px; border:1px solid #CFD2D5; background:#FFFFFF; font-size:12.5px; color:#333333;">
+            </label>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLogo }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:12px; border-top:1px solid #E2E3E5; padding-top:18px;">
+          <div style="font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase; color:#616161; font-weight:700;">Logo</div>
+          <div style="font-size:12.5px; line-height:1.55; color:#616161; background:#FFFFFF; border:1px solid #E2E3E5; padding:12px 14px;">Die Wortmarke liegt als Freisteller vor und wird in vierfacher Auflösung ausgegeben. Für Druck und Fremddienstleister bitte die Originaldateien der Agentur verwenden.</div>
+        </div>
+      </sc-if>
+
+      <div style="display:flex; flex-direction:column; gap:10px; border-top:1px solid #E2E3E5; padding-top:18px;">
+        <div style="font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase; color:#616161; font-weight:700;">Ausgabe</div>
+        <sc-for list="{{ actions }}" as="a" hint-placeholder-count="2">
+          <sc-if value="{{ a.primary }}" hint-placeholder-val="{{ true }}">
+            <button type="button" data-act="{{ a.id }}" onClick="{{ onAction }}" style="background:#FF5900; color:#FFFFFF; border:0; padding:13px 18px; font-size:13.5px; font-weight:700; text-align:left; cursor:pointer;">{{ a.label }}</button>
+          </sc-if>
+          <sc-if value="{{ a.secondary }}" hint-placeholder-val="{{ false }}">
+            <button type="button" data-act="{{ a.id }}" onClick="{{ onAction }}" style="background:#FFFFFF; color:#333333; border:1px solid #CFD2D5; padding:13px 18px; font-size:13.5px; font-weight:700; text-align:left; cursor:pointer;">{{ a.label }}</button>
+          </sc-if>
+        </sc-for>
+        <div style="font-size:12px; line-height:1.5; color:#616161; min-height:30px; padding-top:2px;">{{ message }}</div>
+      </div>
+
+    </div>
+
+    <div data-preview="1" ref="{{ paneRef }}" style="flex:1 1 auto; min-width:0; overflow-y:scroll; overflow-x:auto; scrollbar-gutter:stable; padding:28px; background:#E4E5E7;">
+
+      <sc-if value="{{ isSocial }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:26px;">
+          <div style="display:flex; gap:30px; align-items:flex-start; flex-wrap:wrap;">
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#616161; font-weight:700;">{{ f.ausgabe }} · Vorschau</div>
+              <canvas ref="{{ mainCanvas }}" style="max-width:520px; max-height:520px; width:auto; height:auto; border:1px solid #CFD2D5; background:#FFFFFF;"></canvas>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div style="font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#616161; font-weight:700;">Alle Formate</div>
+              <div style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap;">
+                <div style="display:flex; flex-direction:column; gap:7px;">
+                  <canvas ref="{{ c1 }}" style="width:130px; height:130px; border:1px solid #CFD2D5; background:#FFFFFF;"></canvas>
+                  <div style="font-size:10.5px; color:#616161;">1080 × 1080</div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:7px;">
+                  <canvas ref="{{ c2 }}" style="width:170px; height:89px; border:1px solid #CFD2D5; background:#FFFFFF;"></canvas>
+                  <div style="font-size:10.5px; color:#616161;">1200 × 627</div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:7px;">
+                  <canvas ref="{{ c3 }}" style="width:118px; height:148px; border:1px solid #CFD2D5; background:#FFFFFF;"></canvas>
+                  <div style="font-size:10.5px; color:#616161;">1080 × 1350</div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:7px;">
+                  <canvas ref="{{ c4 }}" style="width:84px; height:149px; border:1px solid #CFD2D5; background:#FFFFFF;"></canvas>
+                  <div style="font-size:10.5px; color:#616161;">1080 × 1920</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <sc-if value="{{ hasSerie }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div style="font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#616161; font-weight:700;">Karussell · {{ serieCount }} Kacheln</div>
+              <div style="display:flex; gap:14px; flex-wrap:wrap;">
+                <sc-for list="{{ serieItems }}" as="s" hint-placeholder-count="4">
+                  <div style="display:flex; flex-direction:column; gap:7px;">
+                    <canvas ref="{{ s.ref }}" style="width:150px; height:150px; border:1px solid #CFD2D5; background:#FFFFFF;"></canvas>
+                    <div style="font-size:10.5px; color:#616161;">{{ s.label }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+          <div style="display:flex; flex-direction:column; gap:10px; max-width:620px;">
+            <div style="font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#616161; font-weight:700;">Begleittext für LinkedIn</div>
+            <div style="background:#FFFFFF; border:1px solid #CFD2D5; padding:16px 18px; font-size:13.5px; line-height:1.6; color:#333333; white-space:pre-wrap;">{{ captionText }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLogo }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; gap:28px; align-items:flex-start; flex-wrap:wrap;">
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#616161; font-weight:700;">Wortmarke dreizeilig</div>
+            <canvas ref="{{ l1 }}" style="width:320px; height:auto; border:1px solid #CFD2D5; background:#FFFFFF;"></canvas>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#616161; font-weight:700;">Auf Anthrazit</div>
+            <canvas ref="{{ l2 }}" style="width:320px; height:auto; border:1px solid #CFD2D5;"></canvas>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#616161; font-weight:700;">Quadratisch · Profilbild</div>
+            <canvas ref="{{ l3 }}" style="width:190px; height:190px; border:1px solid #CFD2D5; background:#FFFFFF;"></canvas>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isMail }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; gap:28px; align-items:flex-start; flex-wrap:wrap;">
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#616161; font-weight:700;">Vorschau · 600 px</div>
+            <div style="width:620px; background:#F8F8F8; padding:10px; border:1px solid #CFD2D5;">
+              <iframe ref="{{ mailFrame }}" title="Mailvorschau" style="width:600px; height:760px; border:0; background:#FFFFFF; display:block;"></iframe>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px; width:400px;">
+            <div style="font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#616161; font-weight:700;">Betreffzeile</div>
+            <div style="font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12px; line-height:1.6; color:#333333; background:#FFFFFF; border:1px solid #CFD2D5; padding:12px 14px;">{{ betreffFinal }}</div>
+            <div style="font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#616161; font-weight:700; padding-top:6px;">Hinweise</div>
+            <div style="font-size:12.5px; line-height:1.6; color:#616161;">Der Quelltext arbeitet mit Tabellen und festen Farben, damit Outlook ihn unverändert darstellt. Webfonts fallen dort auf Arial zurück. Die Wortmarke ist als Text gesetzt, damit nichts nachgeladen werden muss.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSig }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; gap:28px; align-items:flex-start; flex-wrap:wrap;">
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#616161; font-weight:700;">Signatur</div>
+            <div style="background:#FFFFFF; border:1px solid #CFD2D5; padding:22px 26px;">
+              <div style="font-size:14px; font-weight:700; color:#333333;">{{ f.pName }}</div>
+              <div style="font-size:13px; color:#FF5900; font-weight:700; margin-top:2px;">{{ f.pFunktion }}</div>
+              <div style="height:1px; background:#E2E3E5; margin:12px 0;"></div>
+              <div style="font-size:12.5px; line-height:1.6; color:#616161;">mh anwälte Rechtsanwaltsgesellschaft mbH · Schwanthalerstraße 59 A · 60596 Frankfurt am Main</div>
+              <div style="font-size:12.5px; line-height:1.6; color:#616161;">{{ f.pTel }} · {{ f.pMail }} · www.mhanwaelte.de</div>
+            </div>
+          </div>
+          <div style="width:360px; font-size:12.5px; line-height:1.6; color:#616161;">Vier Zeilen, kein Bildbanner: identische Darstellung in Outlook, Apple Mail und Webmail. Über „HTML kopieren" landet die Signatur in der Zwischenablage und kann direkt im Mailprogramm eingefügt werden.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSheet }}" hint-placeholder-val="{{ false }}">
+        <div data-sheetframe="1" style="position:relative; width:100%; height:{{ sheetHeight }}px;">
+          <div data-scaler="1" style="position:absolute; top:0; left:0; transform-origin:top left; transform:scale({{ scale }});">
+
+            <sc-if value="{{ showSave }}" hint-placeholder-val="{{ true }}">
+              <div data-sheet="1" data-screen-label="Save the Date" style="width:297mm; height:210mm; position:relative; overflow:hidden; background:#FFFFFF; page-break-after:always; margin-bottom:8mm; border:1px solid #CFD2D5;">
+                <div style="position:absolute; top:0; left:0; right:0; height:5mm; background:#FF5900;"></div>
+                <div style="position:absolute; top:5mm; left:0; right:0; bottom:58mm; padding:11mm 26mm 0 26mm; display:flex; flex-direction:column;">
+                  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:20mm;">
+                    <div style="font-size:10pt; letter-spacing:3.2px; text-transform:uppercase; color:#FF5900; font-weight:700; padding-top:3mm;">{{ f.kicker }}</div>
+                    <img src="assets/mh-logo-dreizeiler.png" alt="mh anwälte" style="display:block; width:48mm; height:auto; flex:0 0 auto;">
+                  </div>
+                  <div style="font-size:46pt; font-weight:700; line-height:0.98; letter-spacing:-1.5px; text-transform:uppercase; margin-top:6mm;">Save the<br><span style="color:#FF5900;">Date</span></div>
+                  <div style="width:64mm; height:3px; background:#2C353D; margin:5mm 0 4mm 0; flex:0 0 auto;"></div>
+                  <div style="font-size:14pt; font-weight:700; line-height:1.35; max-width:150mm;">{{ f.untertitel }}</div>
+                  <div style="display:flex; flex-wrap:wrap; gap:5mm 14mm; margin-top:auto; border-top:1px solid #E2E3E5; padding:6mm 0 0 0; flex:0 0 auto;">
+                    <sc-for list="{{ tage }}" as="t" hint-placeholder-count="2">
+                      <div style="display:flex; align-items:center; flex:0 0 auto;">
+                        <div style="width:22mm; height:22mm; background:#2C353D; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; margin-right:5mm; flex:0 0 auto;">
+                          <div style="font-size:14pt; font-weight:700; line-height:1; white-space:nowrap;">{{ t.datum }}</div>
+                          <div style="font-size:6.5pt; letter-spacing:1.2px; color:#EFBB20; margin-top:1.5mm; white-space:nowrap;">{{ t.monat }}</div>
+                        </div>
+                        <div style="flex:0 0 auto;">
+                          <div style="font-size:10pt; font-weight:700; letter-spacing:1.6px; text-transform:uppercase; color:#FF5900; white-space:nowrap;">{{ t.wochentag }}</div>
+                          <div style="font-size:12pt; font-weight:700; margin-top:1.2mm; white-space:nowrap;">{{ t.uhrzeit }}</div>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="position:absolute; left:0; right:0; bottom:34mm; height:24mm; background:#EFBB20; display:flex; align-items:center; padding:0 26mm;">
+                  <div style="font-size:12pt; font-weight:700; color:#fff; line-height:1.3;">Klar, kantig, kompetent. Wir beraten Unternehmer. Modern seit mehr als 25 Jahren.</div>
+                </div>
+                <div style="position:absolute; left:0; right:0; bottom:0; height:34mm; background:#2C353D; display:flex; align-items:center; justify-content:space-between; gap:16mm; padding:0 26mm;">
+                  <div>
+                    <div style="font-size:12.5pt; font-weight:700; color:#fff;">{{ f.venue }}<span style="color:#EFBB20;">, {{ f.stadt }}</span></div>
+                    <div style="font-size:9.5pt; color:#A9B0B6; margin-top:2mm;">{{ f.adresse }}</div>
+                  </div>
+                  <div style="text-align:right; max-width:110mm;">
+                    <div style="font-size:9.5pt; color:#D5D8DB; line-height:1.45;">{{ f.hinweis }}</div>
+                    <div style="font-size:8pt; letter-spacing:1.6px; text-transform:uppercase; color:#EFBB20; font-weight:700; margin-top:2.5mm;">{{ faoLine }}</div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ showVoll }}" hint-placeholder-val="{{ false }}">
+              <div style="display:block;">
+
+                <div data-sheet="1" data-screen-label="Deckblatt" style="width:297mm; height:210mm; position:relative; overflow:hidden; background:#FFFFFF; page-break-after:always; margin-bottom:8mm; border:1px solid #CFD2D5;">
+                  <div style="position:absolute; top:0; left:0; right:0; height:5mm; background:#FF5900;"></div>
+                  <div style="position:absolute; top:5mm; left:0; right:0; bottom:58mm; padding:11mm 26mm 0 26mm; display:flex; flex-direction:column;">
+                    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:20mm;">
+                      <div style="font-size:10pt; letter-spacing:3.2px; text-transform:uppercase; color:#FF5900; font-weight:700; padding-top:3mm;">{{ f.kicker }}</div>
+                      <img src="assets/mh-logo-dreizeiler.png" alt="mh anwälte" style="display:block; width:48mm; height:auto; flex:0 0 auto;">
+                    </div>
+                    <div style="font-size:42pt; font-weight:700; line-height:1.04; letter-spacing:-1.2px; text-transform:uppercase; margin-top:10mm; max-width:200mm;">{{ f.titel1 }}<br><span style="color:#FF5900;">{{ f.titel2 }}</span></div>
+                    <div style="width:64mm; height:3px; background:#2C353D; margin:7mm 0 6mm 0; flex:0 0 auto;"></div>
+                    <div style="font-size:13.5pt; font-weight:700; line-height:1.35; max-width:160mm;">{{ f.untertitel }}</div>
+                    <div style="margin-top:auto; border-top:1px solid #E2E3E5; padding-top:6mm; font-size:14pt; font-weight:700; flex:0 0 auto;">{{ terminLine }}<span style="color:#FF5900;">&nbsp;&nbsp;·&nbsp;&nbsp;{{ f.venue }}, {{ f.stadt }}</span></div>
+                  </div>
+                  <div style="position:absolute; left:0; right:0; bottom:34mm; height:24mm; background:#EFBB20; display:flex; align-items:center; padding:0 26mm;">
+                    <div style="font-size:12pt; font-weight:700; color:#fff; line-height:1.3;">Klar, kantig, kompetent. Wir beraten Unternehmer. Modern seit mehr als 25 Jahren.</div>
+                  </div>
+                  <div style="position:absolute; left:0; right:0; bottom:0; height:34mm; background:#2C353D; display:flex; align-items:center; justify-content:space-between; gap:16mm; padding:0 26mm;">
+                    <div style="font-size:9.5pt; letter-spacing:1.8px; text-transform:uppercase; color:#A9B0B6;">sanierung · gestalten · strukturieren</div>
+                    <div style="text-align:right;">
+                      <div style="font-size:8pt; letter-spacing:1.6px; text-transform:uppercase; color:#EFBB20; font-weight:700;">Fortbildung gem. § 15 FAO</div>
+                      <div style="font-size:10pt; color:#fff; margin-top:2mm;">{{ f.fao }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div data-sheet="1" data-screen-label="Einleitung" style="width:297mm; height:210mm; position:relative; overflow:hidden; background:#FFFFFF; page-break-after:always; margin-bottom:8mm; border:1px solid #CFD2D5;">
+                  <div style="position:absolute; top:0; left:0; right:0; height:5mm; background:#FF5900;"></div>
+                  <div style="position:absolute; top:5mm; left:0; right:0; bottom:34mm; padding:14mm 26mm 0 26mm;">
+                    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:20mm;">
+                      <div>
+                        <div style="font-size:9.5pt; letter-spacing:3px; text-transform:uppercase; color:#FF5900; font-weight:700;">Einladung</div>
+                        <div style="font-size:26pt; font-weight:700; line-height:1.14; letter-spacing:-0.6px; text-transform:uppercase; margin-top:6mm; max-width:150mm;">{{ f.titel1 }} {{ f.titel2 }}</div>
+                      </div>
+                      <img src="assets/mh-logo-dreizeiler.png" alt="mh anwälte" style="display:block; width:42mm; height:auto; flex:0 0 auto;">
+                    </div>
+                    <div style="width:64mm; height:4mm; background:#EFBB20; margin:9mm 0 8mm 0;"></div>
+                    <div style="font-size:11.5pt; line-height:1.6; color:#333333; max-width:160mm; white-space:pre-line;">{{ f.intro }}</div>
+                    <div style="display:flex; gap:16mm; margin-top:12mm; max-width:236mm; flex-wrap:wrap;">
+                      <sc-for list="{{ tage }}" as="t" hint-placeholder-count="2">
+                        <div style="flex:1 1 70mm; border-top:2px solid #333333; padding-top:5mm;">
+                          <div style="font-size:9pt; letter-spacing:1.6px; text-transform:uppercase; color:#FF5900; font-weight:700;">{{ t.wochentag }}, {{ t.datum }} {{ t.monat }}</div>
+                          <div style="font-size:13pt; font-weight:700; margin-top:2.5mm;">{{ t.kurztitel }}</div>
+                          <div style="font-size:10.5pt; line-height:1.5; color:#616161; margin-top:2.5mm;">{{ t.zusammenfassung }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="position:absolute; left:0; right:0; bottom:0; height:34mm; background:#2C353D; display:flex; align-items:center; justify-content:space-between; gap:16mm; padding:0 26mm;">
+                    <div>
+                      <div style="font-size:8pt; letter-spacing:2px; text-transform:uppercase; color:#EFBB20; font-weight:700;">Veranstaltungsort</div>
+                      <div style="font-size:12pt; font-weight:700; color:#fff; margin-top:2mm;">{{ f.venue }}</div>
+                    </div>
+                    <div style="text-align:right; font-size:10pt; line-height:1.5; color:#D5D8DB;">{{ f.adresse }}<br>{{ f.stadt }}</div>
+                  </div>
+                </div>
+
+                <sc-for list="{{ tage }}" as="t" hint-placeholder-count="2">
+                  <div data-sheet="1" data-screen-label="Programm" style="width:297mm; height:210mm; position:relative; overflow:hidden; background:#FFFFFF; page-break-after:always; margin-bottom:8mm; border:1px solid #CFD2D5;">
+                    <div style="position:absolute; top:0; left:0; right:0; height:5mm; background:#FF5900;"></div>
+                    <div style="position:absolute; top:5mm; left:0; right:0; bottom:16mm; padding:14mm 26mm 0 26mm;">
+                      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:20mm; border-bottom:3px solid #2C353D; padding-bottom:6mm; margin-bottom:9mm;">
+                        <div>
+                          <div style="font-size:9.5pt; letter-spacing:3px; text-transform:uppercase; color:#FF5900; font-weight:700;">Programm · Tag {{ t.nr }}</div>
+                          <div style="font-size:22pt; font-weight:700; letter-spacing:-0.4px; text-transform:uppercase; margin-top:4mm;">{{ t.wochentag }}, {{ t.datum }} {{ t.monat }}</div>
+                          <div style="font-size:11pt; color:#616161; margin-top:2.5mm;">{{ t.uhrzeit }} · {{ t.kurztitel }}</div>
+                        </div>
+                        <img src="assets/mh-logo-dreizeiler.png" alt="mh anwälte" style="display:block; width:38mm; height:auto; flex:0 0 auto;">
+                      </div>
+                      <div style="display:flex; flex-direction:column; gap:5mm; max-width:236mm;">
+                        <sc-for list="{{ t.punkte }}" as="p" hint-placeholder-count="5">
+                          <div style="display:flex; align-items:flex-start;">
+                            <sc-if value="{{ p.isPause }}" hint-placeholder-val="{{ false }}">
+                              <div style="flex:0 0 auto; width:24mm; padding:2mm 0; background:#F8F8F8; color:#A9B0B6; text-align:center; font-size:10.5pt; font-weight:700; margin-right:7mm;">{{ p.zeit }}</div>
+                            </sc-if>
+                            <sc-if value="{{ p.isTermin }}" hint-placeholder-val="{{ true }}">
+                              <div style="flex:0 0 auto; width:24mm; padding:2mm 0; background:#FF5900; color:#fff; text-align:center; font-size:10.5pt; font-weight:700; margin-right:7mm;">{{ p.zeit }}</div>
+                            </sc-if>
+                            <div style="flex:1 1 auto; padding-top:0.8mm;">
+                              <sc-if value="{{ p.isPause }}" hint-placeholder-val="{{ false }}">
+                                <div style="font-size:11.5pt; font-weight:700; line-height:1.3; color:#A9B0B6;">{{ p.titel }}</div>
+                              </sc-if>
+                              <sc-if value="{{ p.isTermin }}" hint-placeholder-val="{{ true }}">
+                                <div style="font-size:12.5pt; font-weight:700; line-height:1.3;">{{ p.titel }}</div>
+                              </sc-if>
+                              <div style="font-size:10.5pt; color:#FF5900; font-weight:700; margin-top:1.5mm;">{{ p.referent }}</div>
+                              <sc-for list="{{ p.bullets }}" as="b" hint-placeholder-count="0">
+                                <div style="display:flex; align-items:flex-start; margin-top:1.8mm;">
+                                  <div style="width:2mm; height:2mm; background:#EFBB20; margin:1.8mm 3.5mm 0 0; flex:0 0 auto;"></div>
+                                  <div style="font-size:10.5pt; color:#616161; line-height:1.4;">{{ b.text }}</div>
+                                </div>
+                              </sc-for>
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                    <div style="position:absolute; left:26mm; right:26mm; bottom:11mm; display:flex; align-items:center; justify-content:space-between; border-top:1px solid #E2E3E5; padding-top:3mm;">
+                      <div style="font-size:8.5pt; letter-spacing:1.8px; text-transform:uppercase; color:#A9B0B6;">sanierung · gestalten · strukturieren</div>
+                      <div style="font-size:8.5pt; letter-spacing:1.8px; text-transform:uppercase; color:#A9B0B6;">{{ f.venue }}, {{ f.stadt }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+
+                <div data-sheet="1" data-screen-label="Logistik" style="width:297mm; height:210mm; position:relative; overflow:hidden; background:#FFFFFF; margin-bottom:8mm; border:1px solid #CFD2D5;">
+                  <div style="position:absolute; top:0; left:0; right:0; height:5mm; background:#FF5900;"></div>
+                  <div style="position:absolute; top:5mm; left:0; right:0; bottom:58mm; padding:14mm 26mm 0 26mm;">
+                    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:20mm;">
+                      <div>
+                        <div style="font-size:9.5pt; letter-spacing:3px; text-transform:uppercase; color:#FF5900; font-weight:700;">Organisatorisches</div>
+                        <div style="font-size:26pt; font-weight:700; letter-spacing:-0.5px; text-transform:uppercase; margin-top:5mm;">Logistik &amp; Kontakt</div>
+                      </div>
+                      <img src="assets/mh-logo-dreizeiler.png" alt="mh anwälte" style="display:block; width:42mm; height:auto; flex:0 0 auto;">
+                    </div>
+                    <div style="width:64mm; height:4mm; background:#EFBB20; margin:9mm 0 12mm 0;"></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14mm; max-width:236mm;">
+                      <sc-for list="{{ logistik }}" as="l" hint-placeholder-count="3">
+                        <div style="border-top:2px solid #333333; padding-top:5mm;">
+                          <div style="font-size:9pt; letter-spacing:1.8px; text-transform:uppercase; color:#FF5900; font-weight:700;">{{ l.titel }}</div>
+                          <div style="font-size:10.5pt; line-height:1.55; color:#333333; margin-top:3mm; white-space:pre-line;">{{ l.text }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="position:absolute; left:0; right:0; bottom:34mm; height:24mm; background:#EFBB20; display:flex; align-items:center; padding:0 26mm;">
+                    <div style="font-size:12pt; font-weight:700; color:#fff; line-height:1.3;">Klar, kantig, kompetent. Wir beraten Unternehmer. Modern seit mehr als 25 Jahren.</div>
+                  </div>
+                  <div style="position:absolute; left:0; right:0; bottom:0; height:34mm; background:#2C353D; display:flex; align-items:center; justify-content:space-between; gap:16mm; padding:0 26mm;">
+                    <div style="font-size:9pt; color:#A9B0B6;">Programmänderungen vorbehalten.</div>
+                    <div style="font-size:17pt; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:-0.2px;">Wir freuen uns auf Sie.</div>
+                  </div>
+                </div>
+
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isBrief }}" hint-placeholder-val="{{ false }}">
+              <div data-sheet="1" data-screen-label="Briefbogen" style="width:210mm; height:297mm; position:relative; overflow:hidden; background:#FFFFFF; margin-bottom:8mm; border:1px solid #CFD2D5;">
+                <div style="position:absolute; top:0; left:0; right:0; height:4mm; background:#FF5900;"></div>
+                <img src="assets/mh-logo-dreizeiler.png" alt="mh anwälte" style="position:absolute; top:16mm; right:20mm; display:block; width:44mm; height:auto;">
+                <div style="position:absolute; top:45mm; left:25mm; width:85mm; font-size:10pt; line-height:1.5; color:#333333; white-space:pre-line;">{{ f.empfaenger }}</div>
+                <div style="position:absolute; top:45mm; right:20mm; width:60mm; text-align:right; font-size:9pt; line-height:1.6; color:#616161;">
+                  <div>{{ f.zeichen }}</div>
+                  <div>{{ f.briefDatum }}</div>
+                </div>
+                <div style="position:absolute; top:92mm; left:25mm; right:20mm;">
+                  <div style="font-size:12pt; font-weight:700; color:#333333;">{{ f.briefBetreff }}</div>
+                  <div style="width:40mm; height:2px; background:#FF5900; margin:5mm 0 7mm 0;"></div>
+                  <div style="font-size:10.5pt; line-height:1.65; color:#333333; white-space:pre-line;">{{ f.briefText }}</div>
+                  <div style="font-size:10.5pt; font-weight:700; color:#333333; margin-top:10mm;">{{ f.pName }}</div>
+                  <div style="font-size:9.5pt; color:#616161;">{{ f.pFunktion }}</div>
+                  <sc-if value="{{ hasAnlagen }}" hint-placeholder-val="{{ true }}">
+                    <div style="font-size:9pt; color:#616161; margin-top:10mm; border-top:1px solid #E2E3E5; padding-top:3mm;">Anlagen: {{ f.anlagen }}</div>
+                  </sc-if>
+                </div>
+                <div style="position:absolute; left:0; right:0; bottom:0; height:22mm; background:#2C353D; display:flex; align-items:center; justify-content:space-between; padding:0 20mm 0 25mm;">
+                  <div style="font-size:7.5pt; line-height:1.5; color:#D5D8DB;">mh anwälte Rechtsanwaltsgesellschaft mbH · Schwanthalerstraße 59 A · 60596 Frankfurt am Main</div>
+                  <div style="font-size:7.5pt; line-height:1.5; color:#EFBB20; text-align:right;">+49 (0) 69 530875-0 · info@mhanwaelte.de<br>www.mhanwaelte.de</div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isCert }}" hint-placeholder-val="{{ false }}">
+              <div data-sheet="1" data-screen-label="Teilnahmebescheinigung" style="width:297mm; height:210mm; position:relative; overflow:hidden; background:#FFFFFF; margin-bottom:8mm; border:1px solid #CFD2D5;">
+                <div style="position:absolute; top:0; left:0; right:0; height:5mm; background:#FF5900;"></div>
+                <img src="assets/mh-logo-dreizeiler.png" alt="mh anwälte" style="position:absolute; top:16mm; right:26mm; display:block; width:44mm; height:auto;">
+                <div style="position:absolute; top:44mm; left:26mm; right:26mm;">
+                  <div style="font-size:9.5pt; letter-spacing:3px; text-transform:uppercase; color:#FF5900; font-weight:700;">Teilnahmebescheinigung</div>
+                  <div style="font-size:30pt; font-weight:700; letter-spacing:-1px; text-transform:uppercase; margin-top:6mm;">{{ f.teilnehmer }}</div>
+                  <div style="width:64mm; height:4mm; background:#EFBB20; margin:8mm 0 8mm 0;"></div>
+                  <div style="font-size:12pt; line-height:1.6; max-width:190mm;">hat an der Veranstaltung <strong>{{ f.titel1 }} {{ f.titel2 }}</strong> am {{ terminLine }} in {{ f.stadt }} teilgenommen.</div>
+                  <div style="font-size:12pt; line-height:1.6; margin-top:6mm;">Umfang: <strong>{{ f.stunden }} Zeitstunden</strong> gem. § 15 FAO.</div>
+                </div>
+                <div style="position:absolute; left:26mm; bottom:44mm; width:90mm;">
+                  <div style="height:1px; background:#333333;"></div>
+                  <div style="font-size:10pt; font-weight:700; margin-top:3mm;">{{ f.pName }}</div>
+                  <div style="font-size:9pt; color:#616161;">{{ f.certOrt }}, {{ f.briefDatum }}</div>
+                </div>
+                <div style="position:absolute; left:0; right:0; bottom:0; height:34mm; background:#2C353D; display:flex; align-items:center; justify-content:space-between; padding:0 26mm;">
+                  <div style="font-size:9.5pt; letter-spacing:1.8px; text-transform:uppercase; color:#A9B0B6;">sanierung · gestalten · strukturieren</div>
+                  <div style="font-size:9.5pt; color:#EFBB20;">www.mhanwaelte.de</div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isKarte }}" hint-placeholder-val="{{ false }}">
+              <div data-sheet="1" data-screen-label="Visitenkarte" style="width:210mm; height:120mm; position:relative; overflow:hidden; background:#FFFFFF; margin-bottom:8mm; border:1px solid #CFD2D5; padding:20mm; display:flex; gap:14mm;">
+                <div style="width:85mm; height:55mm; background:#FFFFFF; border:1px solid #E2E3E5; position:relative; overflow:hidden; flex:0 0 auto;">
+                  <div style="position:absolute; top:0; left:0; right:0; height:3mm; background:#FF5900;"></div>
+                  <img src="assets/mh-logo-dreizeiler.png" alt="mh anwälte" style="position:absolute; top:8mm; left:8mm; display:block; width:30mm; height:auto;">
+                  <div style="position:absolute; left:8mm; right:8mm; bottom:7mm;">
+                    <div style="font-size:9.5pt; font-weight:700; color:#333333;">{{ f.pName }}</div>
+                    <div style="font-size:7.5pt; color:#FF5900; font-weight:700; margin-top:0.8mm;">{{ f.pFunktion }}</div>
+                    <div style="font-size:7pt; color:#616161; margin-top:2.5mm; line-height:1.5;">{{ f.pTel }} · {{ f.pMail }}</div>
+                  </div>
+                </div>
+                <div style="width:85mm; height:55mm; background:#2C353D; position:relative; overflow:hidden; flex:0 0 auto;">
+                  <div style="position:absolute; top:0; left:0; right:0; height:3mm; background:#FF5900;"></div>
+                  <div style="position:absolute; left:8mm; right:8mm; top:12mm;">
+                    <div style="font-size:11pt; font-weight:700; color:#fff; line-height:1.3; text-transform:uppercase; letter-spacing:-0.2px;">Klar, kantig,<br>kompetent.</div>
+                    <div style="font-size:7pt; letter-spacing:1.6px; text-transform:uppercase; color:#EFBB20; margin-top:4mm;">sanierung · gestalten · strukturieren</div>
+                  </div>
+                  <div style="position:absolute; left:8mm; right:8mm; bottom:7mm; font-size:7pt; line-height:1.55; color:#D5D8DB;">Schwanthalerstraße 59 A · 60596 Frankfurt am Main<br>+49 (0) 69 530875-0 · www.mhanwaelte.de</div>
+                </div>
+              </div>
+            </sc-if>
+
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:940}}">
+const ORANGE = '#FF5900', GOLD = '#EFBB20', INK = '#2C353D', TEXT = '#333333', GREY = '#616161', LIGHT = '#F8F8F8', LINE = '#CFD2D5';
+const SIZES = { '1080x1080': [1080, 1080], '1200x627': [1200, 627], '1080x1350': [1080, 1350], '1080x1920': [1080, 1920] };
+const TABS_DEF = [
+  { id: 'einladung', label: 'Einladung & Save the Date' },
+  { id: 'social', label: 'LinkedIn-Kacheln' },
+  { id: 'mail', label: 'E-Mails' },
+  { id: 'brief', label: 'Briefbogen' },
+  { id: 'cert', label: 'Teilnahmebescheinigung' },
+  { id: 'karte', label: 'Visitenkarte' },
+  { id: 'sig', label: 'E-Mail-Signatur' },
+  { id: 'logo', label: 'Logo-Dateien' }
+];
+const SOCIAL_DEF = {
+  standpunkt: { label: 'Standpunkt / Kernaussage', mode: 'quote', sKicker: 'STANDPUNKT', sBig: 'Eine Sanierung beginnt Monate vor dem Antrag – nicht am Tag der Zahlungsunfähigkeit.', sSub: '', sFl: 'Michael Hemmerich, LL.M.', sFr: 'mhanwaelte.de', sTags: '#Insolvenzrecht #Sanierung #Mittelstand' },
+  rechtsprechung: { label: 'Rechtsprechung', mode: 'headline', sKicker: 'RECHTSPRECHUNG', sBig: 'Sanierungsdarlehen: wann es den Darlehensgeber schützt', sSub: 'Und wann der Insolvenzverwalter es zurückfordert.', sFl: 'Zum Beitrag', sFr: 'mhanwaelte.de', sTags: '#Rechtsprechung #Insolvenzanfechtung' },
+  ratgeber: { label: 'Ratgeber / Fachbeitrag', mode: 'headline', sKicker: 'RATGEBER', sBig: 'Vermögensstatus der GmbH: Überschuldung richtig feststellen', sSub: 'Was Gerichte als Nachweis akzeptieren – und was nicht.', sFl: 'Zum Beitrag', sFr: 'mhanwaelte.de', sTags: '#GmbH #Überschuldung #Geschäftsführerhaftung' },
+  veranstaltung: { label: 'Veranstaltungshinweis', mode: 'headline', sKicker: 'SAVE THE DATE', sBig: 'Krise als Gestaltungsaufgabe', sSub: '11.–12. März 2027, Villa Kennedy, Frankfurt am Main.', sFl: 'Programm folgt', sFr: 'mhanwaelte.de', sTags: '#Veranstaltung #Sanierung #Frankfurt' },
+  zahl: { label: 'Zahl oder Frist', mode: 'number', sKicker: 'DREI WOCHEN', sBig: '3', sSub: 'Wochen bleiben Ihnen nach Eintritt der Zahlungsunfähigkeit für den Insolvenzantrag.', sFl: '§ 15a InsO', sFr: 'mhanwaelte.de', sTags: '#Antragspflicht #Geschäftsführerhaftung' },
+  personalie: { label: 'Personalie / Team', mode: 'headline', sKicker: 'IM TEAM', sBig: 'Seda Uluc', sSub: 'Rechtsanwältin, Insolvenzrecht – seit 2025 bei mh anwälte.', sFl: 'Willkommen', sFr: 'mhanwaelte.de', sTags: '#Team #Insolvenzrecht' },
+  frage: { label: 'Frage an die Leser', mode: 'quote', sKicker: 'FRAGE AN SIE', sBig: 'Wie früh holen Sie in der Krise juristischen Rat dazu?', sSub: 'Wir sammeln Erfahrungen für unsere Mandantenveranstaltung – Antworten gern in die Kommentare.', sFl: '', sFr: 'mhanwaelte.de', sTags: '#Praxisfrage #Sanierung #Mittelstand' },
+  prompt: { label: 'Prompt der Woche', mode: 'prompt', sKicker: 'PROMPT DER WOCHE · KW 35', sBig: 'Gläubigerliste aus dem Kontoauszug', sSub: 'Die Zeitangabe und das vorgegebene Tabellenformat lassen dem Modell keinen Interpretationsspielraum.', sFl: 'Getestet in der Praxis', sFr: 'mhanwaelte.de', sTags: '#KIinderKanzlei #Insolvenzrecht #Legaltech' },
+  projekt: { label: 'Projekt aus der Praxis', mode: 'projekt', sKicker: 'AUS DER PRAXIS · KW 35', sBig: 'Forderungsanmeldungen automatisch vorsortiert', sSub: 'Zwei Tage Handarbeit sind auf eine halbe Stunde Prüfung geschrumpft. Was nicht klappte: Anlagen als Scan – die mussten wir weiter selbst lesen.', sFl: 'Getestet in der Praxis', sFr: 'mhanwaelte.de', sTags: '#KIinderKanzlei #Legaltech #Kanzleipraxis' },
+  stelle: { label: 'Stellenangebot', mode: 'headline', sKicker: 'STELLENANGEBOT', sBig: 'Rechtsanwältin oder Rechtsanwalt für Insolvenzrecht', sSub: 'Frankfurt am Main, Vollzeit, ab sofort.', sFl: 'Bewerbung an info@mhanwaelte.de', sFr: 'mhanwaelte.de', sTags: '#Stellenangebot #Jobs #Frankfurt' }
+};
+const DEFAULTS = {
+  kicker: 'mh anwälte · Mandantenveranstaltung 2027',
+  titel1: 'Krise als', titel2: 'Gestaltungsaufgabe',
+  untertitel: 'Merken Sie sich den Termin schon jetzt vor – Programm und Anmeldung folgen.',
+  venue: 'Villa Kennedy', stadt: 'Frankfurt am Main', adresse: 'Kennedyallee 70, 60596 Frankfurt am Main',
+  fao: '5,0 Zeitstunden · Teilnahmebescheinigung im Anschluss',
+  hinweis: 'Ausführliches Programm, Referentinnen und Referenten sowie die Anmeldung folgen in Kürze.',
+  docArt: 'save',
+  intro: 'Krisen folgen keinem Drehbuch. Wer früh die richtigen Fragen stellt, hat mehr Optionen – rechtlich, wirtschaftlich und persönlich.\n\nWir laden Geschäftsführer, Gesellschafter und Berater zu zwei Tagen ein, an denen wir genau diese Fragen praxisnah durchgehen: von der Antragspflicht über die Haftung bis zur Sanierung im laufenden Betrieb.',
+  tage: '11.03. | MÄRZ 2027 | Donnerstag | 14:00 – 18:30 | Haftung & Antragspflicht | Wann die Pflicht entsteht, wer haftet und welche Nachweise Sie brauchen.\n12.03. | MÄRZ 2027 | Freitag | 09:00 – 13:00 | Sanierung & Personal | StaRUG, Eigenverwaltung und der arbeitsrechtliche Teil der Restrukturierung.',
+  programm: '1 | 14:00 | Begrüßung und Einordnung | Michael Hemmerich, LL.M.\n1 | 14:30 | Zahlungsunfähigkeit feststellen – Liquiditätsstatus in der Praxis | | Dreiwochenzeitraum und Bugwelle; Was Gerichte als Nachweis akzeptieren\n1 | 16:00 | ~Kaffeepause\n1 | 16:30 | Geschäftsführerhaftung: die fünf teuersten Fehler | Gerrit André Richter\n1 | 18:00 | Diskussion und Ausklang\n2 | 09:00 | StaRUG oder Eigenverwaltung – Wege und Voraussetzungen | Michael Hemmerich, LL.M.\n2 | 10:30 | Personalabbau in der Krise | Seda Uluc | Kündigung, Abfindung, Betriebsübergang; Wer wartet, bis es brennt, zahlt drauf\n2 | 11:30 | ~Pause\n2 | 11:45 | Distressed M&A: Kauf aus der Krise\n2 | 12:45 | Schlusswort',
+  logistik: 'Veranstaltungsort | Villa Kennedy / Kennedyallee 70 / 60596 Frankfurt am Main\nAnmeldung | mh anwälte Rechtsanwaltsgesellschaft mbH / Schwanthalerstraße 59 A / 60596 Frankfurt am Main / +49 (0) 69 530875-0 / info@mhanwaelte.de\nFortbildung | 5,0 Zeitstunden gem. § 15 FAO. / Teilnahmebescheinigungen erhalten Sie im Anschluss an die Veranstaltung.',
+  sTyp: 'standpunkt', ausgabe: '1080x1080',
+  sSerie: 'Was zuerst zählt | Ein belastbarer Liquiditätsstatus. Ohne ihn ist jede Aussage zur Antragspflicht eine Vermutung – und Vermutungen halten vor Gericht nicht.\nWorauf Gerichte schauen | Der Dreiwochenzeitraum, die Bugwelle offener Verbindlichkeiten und die Frage, ob Löhne und Sozialabgaben noch bedient wurden.\nWas Sie jetzt tun sollten | Zahlungsströme wöchentlich fortschreiben und jede Zahlung an Sozialversicherungsträger dokumentieren. Diese Akte entscheidet später über die Haftung.',
+  sModell: 'Sprachmodell mit Dateianalyse',
+  sPromptText: 'Lies die beigefügten Kontoauszüge der letzten sechs Monate. Erstelle eine Tabelle aller wiederkehrenden Zahlungsempfänger mit Betrag, Intervall und letzter Zahlung. Markiere Sozialversicherungsträger und Finanzamt separat.',
+  sWarn: 'Keine Mandantendaten in öffentliche Modelle – nur anonymisierte Sachverhalte.',
+  sFazitTitel: 'Fazit', sFazit: 'Wer früh rechnet, hat Optionen. Wer wartet, hat nur noch Fristen. Fragen zur Umsetzung? Sprechen Sie uns an.',
+  sKicker: SOCIAL_DEF.standpunkt.sKicker, sBig: SOCIAL_DEF.standpunkt.sBig, sSub: '', sFl: SOCIAL_DEF.standpunkt.sFl, sFr: 'mhanwaelte.de', sTags: SOCIAL_DEF.standpunkt.sTags,
+  mailTyp: 'save', mailBetreff: '', mailAnrede: 'Sehr geehrte Damen und Herren,',
+  mailText: 'wir laden Sie herzlich ein, sich den Termin für unsere Mandantenveranstaltung vorzumerken.\n\nZwei Tage, an denen wir die Fragen durchgehen, die in der Krise wirklich zählen: Antragspflicht, Haftung, Sanierung im laufenden Betrieb – praxisnah, ohne Folienschlacht.\n\nDas ausführliche Programm und die Anmeldung folgen in den kommenden Wochen.',
+  mailCta: 'Termin im Kalender vormerken',
+  empfaenger: 'Muster GmbH\nHerrn Geschäftsführer Max Muster\nBeispielweg 8\n60313 Frankfurt am Main',
+  zeichen: 'MH/2027-118', briefDatum: '12. Januar 2027',
+  briefBetreff: 'Liquiditätsstatus und Antragspflicht – nächste Schritte',
+  briefText: 'Sehr geehrter Herr Muster,\n\nnach Durchsicht der übersandten Unterlagen halten wir folgende Punkte fest.\n\nDer Liquiditätsstatus zum Stichtag weist eine Unterdeckung aus, die innerhalb des Dreiwochenzeitraums nicht ohne weitere Maßnahmen zu schließen ist. Wir empfehlen, die Zahlungsströme ab sofort wöchentlich fortzuschreiben und jede Zahlung an Sozialversicherungsträger zu dokumentieren.\n\nFür das weitere Vorgehen schlagen wir ein Gespräch in dieser Woche vor.\n\nMit freundlichen Grüßen',
+  anlagen: 'Liquiditätsplan · Checkliste Antragspflicht',
+  teilnehmer: 'Max Muster', stunden: '5,0', certOrt: 'Frankfurt am Main',
+  pName: 'Michael Hemmerich, LL.M.', pFunktion: 'Rechtsanwalt · Fachanwalt · Sanierungsberater', pTel: '+49 (0) 69 530875-0', pMail: 'mh@mhanwaelte.de'
+};
+
+class Component extends DCLogic {
+  KEY = 'mh-generator-v2';
+  pxPerMm = 3.7795;
+  state = { tab: 'einladung', f: { ...DEFAULTS }, message: '', scale: 0.5, saved: false };
+  paneRef = React.createRef();
+  mainCanvas = React.createRef();
+  c1 = React.createRef(); c2 = React.createRef(); c3 = React.createRef(); c4 = React.createRef();
+  l1 = React.createRef(); l2 = React.createRef(); l3 = React.createRef();
+  sRefs = Array.from({ length: 10 }, () => React.createRef());
+  mailFrame = React.createRef();
+
+  componentDidMount() {
+    try {
+      const raw = localStorage.getItem(this.KEY);
+      if (raw) this.setState({ f: Object.assign({}, DEFAULTS, JSON.parse(raw)), saved: true });
+    } catch (e) {}
+    this.logo = new Image();
+    this.logo.onload = () => this.paintAll();
+    this.logo.src = 'assets/mh-logo-dreizeiler.png';
+    this.measure();
+    this.ro = new ResizeObserver(() => this.measure());
+    if (this.paneRef.current) this.ro.observe(this.paneRef.current);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.paintAll());
+    this.paintAll();
+  }
+  componentDidUpdate() { this.paintAll(); }
+  componentWillUnmount() { if (this.ro) this.ro.disconnect(); }
+
+  measure() {
+    const el = this.paneRef.current;
+    if (!el) return;
+    const wide = this.state.tab === 'brief' || this.state.tab === 'karte' ? 210 : 297;
+    // offsetWidth + fester Scrollbalken-Abzug: verhindert die Rückkopplung
+    // Skalierung -> Höhe -> Scrollbalken -> Breite -> Skalierung
+    const raw = (el.offsetWidth - 76) / (wide * this.pxPerMm);
+    const s = Math.round(Math.max(0.2, Math.min(1, raw)) * 50) / 50;
+    if (Math.abs(s - this.state.scale) > 0.019) this.setState({ scale: s });
+  }
+  persist(f) {
+    try { localStorage.setItem(this.KEY, JSON.stringify(f)); this.setState({ saved: true }); } catch (e) {}
+  }
+  set(name, value) {
+    const f = Object.assign({}, this.state.f, { [name]: value });
+    this.setState({ f }, () => this.persist(f));
+  }
+  msg(text) { this.setState({ message: text }); }
+
+  parseTage() {
+    return (this.state.f.tage || '').split('\n').map(l => l.trim()).filter(Boolean).map((line, i) => {
+      const c = line.split('|').map(x => x.trim());
+      return { nr: i + 1, datum: c[0] || '', monat: c[1] || '', wochentag: c[2] || '', uhrzeit: c[3] || '', kurztitel: c[4] || '', zusammenfassung: c[5] || '' };
+    });
+  }
+  parseProgramm(dayNr) {
+    return (this.state.f.programm || '').split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+      const c = line.split('|').map(x => x.trim());
+      return { tag: c[0] || '1', zeit: c[1] || '', titel: c[2] || '', referent: c[3] || '', bullets: c[4] || '' };
+    }).filter(p => String(p.tag) === String(dayNr)).map(p => {
+      const pause = p.titel.startsWith('~');
+      return {
+        zeit: p.zeit, titel: pause ? p.titel.slice(1).trim() : p.titel, referent: p.referent,
+        isPause: pause, isTermin: !pause,
+        bullets: p.bullets.split(';').map(x => x.trim()).filter(Boolean).map(text => ({ text }))
+      };
+    });
+  }
+  parseLogistik() {
+    return (this.state.f.logistik || '').split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+      const c = line.split('|').map(x => x.trim());
+      return { titel: c[0] || '', text: (c[1] || '').split('/').map(x => x.trim()).filter(Boolean).join('\n') };
+    });
+  }
+  terminLine() {
+    const t = this.parseTage();
+    if (!t.length) return '';
+    if (t.length === 1) return t[0].datum + ' ' + t[0].monat;
+    return t[0].datum + '–' + t[t.length - 1].datum + ' ' + t[t.length - 1].monat;
+  }
+  betreff() {
+    const f = this.state.f;
+    if (f.mailBetreff && f.mailBetreff.trim()) return f.mailBetreff.trim();
+    const ort = f.stadt || '';
+    if (f.mailTyp === 'save') return 'Save the Date · ' + f.titel1 + ' ' + f.titel2 + ' in ' + ort;
+    if (f.mailTyp === 'einladung') return 'Einladung · ' + f.titel1 + ' ' + f.titel2 + ', ' + this.terminLine();
+    return 'mh anwälte · Mandantenrundschreiben';
+  }
+  caption() {
+    const f = this.state.f;
+    const parts = [f.sBig];
+    if (f.sSub) parts.push(f.sSub);
+    parts.push('Mehr dazu auf mhanwaelte.de.');
+    if (f.sTags) parts.push(f.sTags);
+    return parts.join('\n\n');
+  }
+
+  longestWord(ctx, text) {
+    return String(text || '').split(/\s+/).filter(Boolean)
+      .reduce((m, w) => Math.max(m, ctx.measureText(w).width), 0);
+  }
+  wrap(ctx, text, maxW, allowBreak) {
+    const words = String(text || '').split(/\s+/).filter(Boolean);
+    const lines = [];
+    let cur = '';
+    const push = s => { if (s) lines.push(s); };
+    words.forEach(w => {
+      // Überlanges Einzelwort (deutsche Komposita) trennen – nur als letzte Rettung,
+      // wenn der Schriftgrad schon am Minimum ist
+      if (allowBreak !== false && ctx.measureText(w).width > maxW) {
+        push(cur); cur = '';
+        let part = '';
+        for (const ch of w) {
+          if (ctx.measureText(part + ch + '-').width > maxW && part) { push(part + '-'); part = ch; }
+          else part += ch;
+        }
+        cur = part;
+        return;
+      }
+      const test = cur ? cur + ' ' + w : w;
+      if (ctx.measureText(test).width > maxW && cur) { push(cur); cur = w; } else cur = test;
+    });
+    push(cur);
+    return lines;
+  }
+  widest(ctx, lines) {
+    return lines.reduce((m, l) => Math.max(m, ctx.measureText(l).width), 0);
+  }
+  // Prompt der Woche / Projekt aus der Praxis: Terminal-Anmutung in Hausfarben
+  paintPromptTile(canvas, W, H, mode) {
+    const ctx = canvas.getContext('2d');
+    const f = this.state.f;
+    const S = Math.min(W, H);
+    const sans = (w, s) => w + ' ' + Math.round(s) + 'px "Open Sans", Arial, sans-serif';
+    const mono = (w, s) => w + ' ' + Math.round(s) + 'px "IBM Plex Mono", ui-monospace, monospace';
+    const pad = Math.round(S * 0.082);
+    const footH = Math.round(Math.max(S * 0.105, H * 0.1));
+    const isProjekt = mode === 'projekt';
+    const bodyW = W - pad * 2;
+
+    ctx.fillStyle = INK; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = ORANGE; ctx.fillRect(0, 0, W, Math.round(Math.max(6, S * 0.022)));
+    ctx.textBaseline = 'top';
+
+    let y = Math.round(S * 0.078);
+    if (ctx.letterSpacing !== undefined) ctx.letterSpacing = Math.round(S * 0.004) + 'px';
+    ctx.font = sans('700', S * 0.028);
+    ctx.fillStyle = GOLD;
+    ctx.fillText(String(f.sKicker || '').toUpperCase(), pad, y);
+    if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
+    y += Math.round(S * 0.062);
+
+    // Etikett für das eingesetzte Werkzeug
+    if (f.sModell && f.sModell.trim()) {
+      ctx.font = sans('700', S * 0.024);
+      const tw = ctx.measureText(f.sModell).width;
+      const bh = Math.round(S * 0.048), bw = Math.round(tw + S * 0.055);
+      ctx.strokeStyle = '#4A555E'; ctx.lineWidth = Math.max(1, Math.round(S * 0.0022));
+      ctx.strokeRect(pad, y, bw, bh);
+      ctx.fillStyle = '#C9CFD3';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(f.sModell, pad + Math.round(S * 0.0275), y + bh / 2);
+      ctx.textBaseline = 'top';
+      y += bh + Math.round(S * 0.05);
+    }
+
+    // Titel, verkleinert bis er passt
+    const promptBody = isProjekt ? '' : String(f.sPromptText || '');
+    const warn = String(f.sWarn || '').trim();
+    const bottomLimit = H - footH - Math.round(S * 0.045);
+    let tfs = Math.round(S * 0.058), tLines, tLh, guard = 0;
+    while (guard++ < 40) {
+      ctx.font = sans('700', tfs);
+      tLines = this.wrap(ctx, isProjekt ? f.sBig : f.sBig, bodyW, false);
+      tLh = Math.round(tfs * 1.16);
+      if (this.longestWord(ctx, f.sBig) <= bodyW && tLines.length * tLh < S * 0.3) break;
+      if (tfs <= Math.round(S * 0.034)) { tLines = this.wrap(ctx, f.sBig, bodyW, true); break; }
+      tfs -= Math.max(2, Math.round(S * 0.003));
+    }
+    ctx.fillStyle = '#FFFFFF'; ctx.font = sans('700', tfs);
+    tLines.forEach(l => { ctx.fillText(l, pad, y); y += tLh; });
+    y += Math.round(S * 0.022);
+    ctx.fillStyle = GOLD; ctx.fillRect(pad, y, Math.round(S * 0.16), Math.round(Math.max(5, S * 0.009)));
+    y += Math.round(S * 0.048);
+
+    const warnH = warn ? Math.round(S * 0.062) : 0;
+    const noteAvail = bottomLimit - warnH - y;
+
+    if (!isProjekt && promptBody) {
+      // Prompt im abgesetzten Feld mit oranger Kante
+      let pfs = Math.round(S * 0.032), pl, plh, g2 = 0;
+      const inner = bodyW - Math.round(S * 0.105);
+      while (g2++ < 40) {
+        ctx.font = mono('400', pfs);
+        pl = this.wrap(ctx, promptBody, inner, false);
+        plh = Math.round(pfs * 1.5);
+        const noteFs = Math.round(S * 0.027);
+        ctx.font = sans('400', noteFs);
+        const nl = f.sSub ? this.wrap(ctx, f.sSub, bodyW).length : 0;
+        const need = pl.length * plh + Math.round(S * 0.058) + Math.round(S * 0.03) + nl * Math.round(noteFs * 1.45);
+        if (need <= noteAvail || pfs <= Math.round(S * 0.021)) break;
+        pfs -= 1;
+      }
+      ctx.font = mono('400', pfs);
+      const blockH = pl.length * plh + Math.round(S * 0.058);
+      ctx.fillStyle = '#232A31'; ctx.fillRect(pad, y, bodyW, blockH);
+      ctx.fillStyle = ORANGE; ctx.fillRect(pad, y, Math.round(S * 0.008), blockH);
+      ctx.save(); ctx.beginPath(); ctx.rect(pad, y, bodyW, blockH); ctx.clip();
+      ctx.fillStyle = ORANGE; ctx.font = mono('700', pfs);
+      ctx.fillText('>', pad + Math.round(S * 0.032), y + Math.round(S * 0.028));
+      ctx.fillStyle = '#EDEFF1'; ctx.font = mono('400', pfs);
+      let py = y + Math.round(S * 0.028);
+      pl.forEach(l => { ctx.fillText(l, pad + Math.round(S * 0.07), py); py += plh; });
+      ctx.restore();
+      y += blockH + Math.round(S * 0.032);
+    }
+
+    if (f.sSub) {
+      const nfs = Math.round(S * 0.027);
+      ctx.font = sans('400', nfs);
+      ctx.fillStyle = '#A9B0B6';
+      ctx.save(); ctx.beginPath(); ctx.rect(0, y - 4, W, bottomLimit - warnH - y + 4); ctx.clip();
+      this.wrap(ctx, f.sSub, bodyW).forEach(l => { ctx.fillText(l, pad, y); y += Math.round(nfs * 1.45); });
+      ctx.restore();
+    }
+
+    if (warn) {
+      const wy = H - footH - warnH - Math.round(S * 0.014);
+      ctx.fillStyle = 'rgba(255,89,0,0.13)';
+      ctx.fillRect(pad, wy, bodyW, warnH);
+      ctx.fillStyle = ORANGE;
+      ctx.fillRect(pad, wy, Math.round(S * 0.006), warnH);
+      ctx.textBaseline = 'middle';
+      ctx.font = sans('700', S * 0.025);
+      ctx.fillStyle = '#FFC9A8';
+      ctx.save(); ctx.beginPath(); ctx.rect(pad, wy, bodyW, warnH); ctx.clip();
+      ctx.fillText(warn, pad + Math.round(S * 0.028), wy + warnH / 2);
+      ctx.restore();
+      ctx.textBaseline = 'top';
+    }
+
+    ctx.fillStyle = '#1F262C'; ctx.fillRect(0, H - footH, W, footH);
+    ctx.textBaseline = 'middle';
+    ctx.font = sans('700', Math.round(S * 0.029));
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(String(f.sFl || ''), pad, H - footH / 2);
+    ctx.fillStyle = GOLD; ctx.textAlign = 'right';
+    ctx.fillText(String(f.sFr || ''), W - pad, H - footH / 2);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  }
+  paintTile(canvas, size) {
+    if (!canvas) return;
+    const dim = SIZES[size] || SIZES['1080x1080'];
+    const W = dim[0], H = dim[1];
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    const f = this.state.f;
+    const mode = (SOCIAL_DEF[f.sTyp] || SOCIAL_DEF.standpunkt).mode;
+    if (mode === 'prompt' || mode === 'projekt') return this.paintPromptTile(canvas, W, H, mode);
+    const S = Math.min(W, H);
+    const land = true; // Logo sitzt in jedem Format oben rechts, der Textblock darunter
+    const pad = Math.round(S * 0.085);
+    const footH = Math.round(Math.max(S * 0.1, H * 0.115));
+    const logoRatio = this.logo && this.logo.naturalWidth ? this.logo.naturalHeight / this.logo.naturalWidth : 0.53;
+    const logoW = Math.round(W * (land ? 0.15 : 0.24));
+    const logoH = Math.round(logoW * logoRatio);
+    const kickFs = Math.round(S * 0.028);
+    const font = (w, s) => w + ' ' + Math.round(s) + 'px "Open Sans", Arial, sans-serif';
+
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = ORANGE; ctx.fillRect(0, 0, W, Math.round(Math.max(6, S * 0.022)));
+
+    const kickY = Math.round(Math.max(S * 0.07, H * 0.055));
+    ctx.textBaseline = 'top';
+    if (ctx.letterSpacing !== undefined) ctx.letterSpacing = Math.round(S * 0.004) + 'px';
+    ctx.fillStyle = ORANGE;
+    ctx.font = font('700', kickFs);
+    ctx.fillText(String(f.sKicker || '').toUpperCase(), pad, kickY);
+    if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
+
+    // Logo: im Querformat oben rechts, sonst über dem Fußbalken
+    const logoTop = land ? kickY - Math.round(logoH * 0.25) : 0;
+    if (this.logo && this.logo.complete && this.logo.naturalWidth && land) {
+      ctx.drawImage(this.logo, W - pad - logoW, Math.max(Math.round(S * 0.03), logoTop), logoW, logoH);
+    }
+
+    const portrait = H / W > 1.15;
+    const bandH = portrait ? Math.round(H * 0.055) : 0;
+    // Textblock beginnt unter dem Logoband – dadurch steht ihm die volle Breite zur Verfügung
+    const logoBottom = Math.max(Math.round(S * 0.03), kickY - Math.round(logoH * 0.25)) + logoH;
+    const top = Math.max(kickY + Math.round(kickFs * 2.3), logoBottom + Math.round(S * 0.035));
+    const bottom = H - footH - bandH - Math.round(S * 0.05) - (land ? 0 : logoH + Math.round(S * 0.04));
+    const avail = Math.max(40, bottom - top);
+    const isQuote = mode === 'quote';
+    const barW = Math.round(S * 0.014);
+    const maxW = Math.max(Math.round(W * 0.3), W - pad * 2 - (isQuote ? Math.round(S * 0.055) : 0));
+    const goldH = Math.round(Math.max(5, S * 0.009));
+
+    let fs, lines, lh, subFs, subLines, subLh, blockH;
+    const minFs = Math.round(S * 0.032);
+    const subMaxW = W - pad * 2;
+    const startFs = Math.round(S * (mode === 'number' ? 0.34 : String(f.sBig || '').length > 90 ? 0.072 : 0.098));
+    let guard = 0;
+    for (fs = startFs; fs >= minFs && guard < 60; fs -= Math.max(2, Math.round(S * 0.004)), guard++) {
+      ctx.font = font(mode === 'number' ? '800' : '700', fs);
+      // Erst ohne Trennung umbrechen: so bleibt die Breitenprüfung wirksam
+      lines = mode === 'number' ? [String(f.sBig || '')] : this.wrap(ctx, f.sBig, maxW, false);
+      lh = Math.round(fs * (mode === 'number' ? 1.0 : 1.14));
+      const tooWide = mode !== 'number' && this.longestWord(ctx, f.sBig) > maxW;
+      subFs = Math.round(Math.min(fs * 0.52, S * 0.045));
+      ctx.font = font(mode === 'number' ? '700' : '400', subFs);
+      subLines = f.sSub ? this.wrap(ctx, f.sSub, subMaxW) : [];
+      subLh = Math.round(subFs * 1.4);
+      blockH = lines.length * lh + Math.round(S * 0.03) + goldH + Math.round(S * 0.035) + subLines.length * subLh;
+      if (blockH <= avail && !tooWide) break;
+    }
+    // Am Minimum angekommen und ein Wort ist noch zu breit: jetzt erst trennen
+    if (mode !== 'number') {
+      ctx.font = font('700', fs);
+      if (this.longestWord(ctx, f.sBig) > maxW) {
+        lines = this.wrap(ctx, f.sBig, maxW, true);
+        blockH = lines.length * lh + Math.round(S * 0.03) + goldH + Math.round(S * 0.035) + subLines.length * subLh;
+      }
+    }
+
+    // Textblock im Hochformat vertikal ausmitteln, damit keine Totfläche entsteht
+    let y = top + Math.round(Math.max(0, (avail - blockH)) * (portrait ? 0.42 : 0));
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, top - Math.round(S * 0.01), W, bottom - top + Math.round(S * 0.01));
+    ctx.clip();
+    const tx = isQuote ? pad + Math.round(S * 0.055) : pad;
+    ctx.fillStyle = mode === 'number' ? ORANGE : TEXT;
+    ctx.font = font(mode === 'number' ? '800' : '700', fs);
+    if (isQuote) {
+      ctx.fillStyle = ORANGE;
+      ctx.fillRect(pad, y + Math.round(fs * 0.14), barW, lines.length * lh - Math.round(fs * 0.24));
+      ctx.fillStyle = TEXT;
+    }
+    lines.forEach(l => { ctx.fillText(l, tx, y); y += lh; });
+    y += Math.round(S * 0.03);
+    ctx.fillStyle = GOLD; ctx.fillRect(pad, y, Math.round(S * 0.16), goldH);
+    y += goldH + Math.round(S * 0.035);
+    if (subLines.length) {
+      ctx.fillStyle = mode === 'number' ? TEXT : GREY;
+      ctx.font = font(mode === 'number' ? '700' : '400', subFs);
+      subLines.forEach(l => { ctx.fillText(l, pad, y); y += subLh; });
+    }
+    ctx.restore();
+
+    // Hochformat: Goldband über dem Fußbalken fängt die untere Fläche
+    if (portrait) {
+      ctx.fillStyle = GOLD;
+      ctx.fillRect(0, H - footH - bandH, W, bandH);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textBaseline = 'middle';
+      ctx.font = font('700', Math.round(S * 0.032));
+      ctx.fillText('Klar, kantig, kompetent.', pad, H - footH - bandH / 2);
+      ctx.textBaseline = 'top';
+    }
+    ctx.fillStyle = INK; ctx.fillRect(0, H - footH, W, footH);
+    ctx.textBaseline = 'middle';
+    ctx.font = font('700', Math.round(S * 0.03));
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(String(f.sFl || ''), pad, H - footH / 2);
+    ctx.fillStyle = GOLD;
+    ctx.textAlign = 'right';
+    ctx.fillText(String(f.sFr || ''), W - pad, H - footH / 2);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+  }
+  parseSerie() {
+    const f = this.state.f;
+    const beitraege = (f.sSerie || '').split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+      const c = line.split('|').map(x => x.trim());
+      return { kind: 'beitrag', titel: c[0] || '', text: c[1] || '' };
+    });
+    if (!beitraege.length) return [];
+    const items = [{ kind: 'titel', titel: f.sBig, text: f.sSub }].concat(beitraege);
+    if (f.sFazit && f.sFazit.trim()) items.push({ kind: 'fazit', titel: f.sFazitTitel || 'Fazit', text: f.sFazit });
+    return items.slice(0, 10).map((it, i) => Object.assign({}, it, {
+      nr: i + 1,
+      label: (i + 1 < 10 ? '0' : '') + (i + 1) + ' · ' + (it.kind === 'titel' ? 'Titelkachel' : it.kind === 'fazit' ? 'Fazit' : 'Beitrag')
+    }));
+  }
+  paintSerieTile(canvas, item, total) {
+    if (!canvas) return;
+    const W = 1080, H = 1080, S = 1080;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    const f = this.state.f;
+    const pad = Math.round(S * 0.085);
+    const footH = Math.round(S * 0.115);
+    const font = (w, s) => w + ' ' + Math.round(s) + 'px "Open Sans", Arial, sans-serif';
+    const logoRatio = this.logo && this.logo.naturalWidth ? this.logo.naturalHeight / this.logo.naturalWidth : 0.53;
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = ORANGE; ctx.fillRect(0, 0, W, Math.round(S * 0.022));
+    ctx.textBaseline = 'top';
+
+    const isTitel = item.kind === 'titel';
+    const logoW = Math.round(W * 0.2), logoH = Math.round(logoW * logoRatio);
+    if (this.logo && this.logo.complete && this.logo.naturalWidth) {
+      ctx.drawImage(this.logo, W - pad - logoW, Math.round(S * 0.055), logoW, logoH);
+    }
+
+    let y = Math.round(S * 0.075);
+    if (isTitel) {
+      if (ctx.letterSpacing !== undefined) ctx.letterSpacing = Math.round(S * 0.004) + 'px';
+      ctx.fillStyle = ORANGE; ctx.font = font('700', S * 0.028);
+      ctx.fillText(String(f.sKicker || '').toUpperCase(), pad, y);
+      if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
+    } else {
+      ctx.fillStyle = ORANGE; ctx.font = font('800', S * 0.1);
+      ctx.fillText((item.nr < 10 ? '0' : '') + item.nr, pad, y);
+    }
+    y += Math.round(S * (isTitel ? 0.075 : 0.14));
+
+    const maxW = W - pad * 2 - (isTitel ? 0 : 0);
+    const bottom = H - footH - Math.round(S * 0.06);
+    const titelText = isTitel ? f.sBig : item.titel;
+    let fs = Math.round(S * (isTitel ? 0.088 : 0.062));
+    let lines, lh, guard = 0;
+    while (guard++ < 40) {
+      ctx.font = font('700', fs);
+      lines = this.wrap(ctx, titelText, maxW);
+      lh = Math.round(fs * 1.15);
+      if (y + lines.length * lh < bottom - Math.round(S * 0.1) || fs <= Math.round(S * 0.034)) break;
+      fs -= Math.max(2, Math.round(S * 0.004));
+    }
+    ctx.fillStyle = TEXT; ctx.font = font('700', fs);
+    lines.forEach(l => { ctx.fillText(l, pad, y); y += lh; });
+    y += Math.round(S * 0.03);
+    ctx.fillStyle = GOLD; ctx.fillRect(pad, y, Math.round(S * 0.16), Math.round(S * 0.009));
+    y += Math.round(S * 0.045);
+
+    const body = isTitel ? f.sSub : item.text;
+    if (body) {
+      let bfs = Math.round(S * 0.042);
+      let blines, blh, g2 = 0;
+      while (g2++ < 40) {
+        ctx.font = font('400', bfs);
+        blines = this.wrap(ctx, body, maxW);
+        blh = Math.round(bfs * 1.45);
+        if (y + blines.length * blh < bottom || bfs <= Math.round(S * 0.026)) break;
+        bfs -= 2;
+      }
+      ctx.save(); ctx.beginPath(); ctx.rect(0, y - 4, W, bottom - y + 4); ctx.clip();
+      ctx.fillStyle = GREY; ctx.font = font('400', bfs);
+      blines.forEach(l => { ctx.fillText(l, pad, y); y += blh; });
+      ctx.restore();
+    }
+
+    ctx.fillStyle = INK; ctx.fillRect(0, H - footH, W, footH);
+    ctx.textBaseline = 'middle';
+    ctx.font = font('700', Math.round(S * 0.03));
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(isTitel ? 'Weiter wischen' : 'mhanwaelte.de', pad, H - footH / 2);
+    ctx.fillStyle = GOLD; ctx.textAlign = 'right';
+    ctx.fillText((item.nr < 10 ? '0' : '') + item.nr + ' / ' + ((total < 10 ? '0' : '') + total), W - pad, H - footH / 2);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  }
+  paintLogo(canvas, dark, square) {
+    if (!canvas) return;
+    // Dunkle Fassung: helle Wortmarke direkt auf Anthrazit – keine weiße Platte
+    if (dark) {
+      const W = 1200, H = 712;
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = INK; ctx.fillRect(0, 0, W, H);
+      const fs = Math.round(W * 0.13);
+      const font = s => '700 ' + Math.round(s) + 'px "Open Sans", Arial, sans-serif';
+      const right = Math.round(W * 0.86);
+      const lh = Math.round(fs * 1.08);
+      let y = Math.round(H / 2 - lh * 1.35);
+      ctx.textBaseline = 'top';
+      ctx.textAlign = 'right';
+      ctx.font = font(fs);
+      const wMh = ctx.measureText('mh').width, wRest = ctx.measureText('emmerich').width;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText('emmerich', right, y);
+      ctx.fillStyle = ORANGE;
+      ctx.fillText('mh', right - wRest, y);
+      y += lh;
+      ctx.fillStyle = ORANGE;
+      ctx.fillText('anwälte', right, y);
+      y += lh;
+      ctx.font = font(fs * 0.86);
+      ctx.fillStyle = '#C9CFD3';
+      ctx.fillText('frankfurt', right, y);
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = ORANGE;
+      ctx.fillRect(Math.round(W * 0.08), Math.round(H / 2 - lh * 1.35), Math.round(W * 0.012), lh * 3);
+      return;
+    }
+    if (!this.logo || !this.logo.complete || !this.logo.naturalWidth) return;
+    const iw = this.logo.naturalWidth, ih = this.logo.naturalHeight;
+    const W = square ? 800 : 1200;
+    const H = square ? 800 : Math.round(1200 * ih / iw * 0.8) + 200;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
+    const boxW = Math.round(W * (square ? 0.72 : 0.8));
+    const boxH = Math.round(boxW * ih / iw);
+    ctx.drawImage(this.logo, (W - boxW) / 2, (H - boxH) / 2, boxW, boxH);
+    ctx.fillStyle = ORANGE; ctx.fillRect(0, 0, W, Math.round(H * 0.02));
+  }
+  paintAll() {
+    const t = this.state.tab;
+    if (t === 'social') {
+      this.paintTile(this.mainCanvas.current, this.state.f.ausgabe);
+      this.paintTile(this.c1.current, '1080x1080');
+      this.paintTile(this.c2.current, '1200x627');
+      this.paintTile(this.c3.current, '1080x1350');
+      this.paintTile(this.c4.current, '1080x1920');
+      const serie = this.parseSerie();
+      serie.forEach((it, i) => this.paintSerieTile(this.sRefs[i].current, it, serie.length));
+    }
+    if (t === 'logo') {
+      this.paintLogo(this.l1.current, false, false);
+      this.paintLogo(this.l2.current, true, false);
+      this.paintLogo(this.l3.current, false, true);
+    }
+    if (t === 'mail') {
+      const fr = this.mailFrame.current;
+      if (fr) {
+        const doc = fr.contentDocument;
+        if (doc) { doc.open(); doc.write(this.mailHtml()); doc.close(); }
+      }
+    }
+  }
+
+  mailHtml() {
+    const f = this.state.f;
+    const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const paras = String(f.mailText || '').split('\n\n').map(p => '<p style="margin:0 0 16px 0; font-size:15px; line-height:1.65; color:#333333;">' + esc(p).replace(/\n/g, '<br>') + '</p>').join('');
+    const tage = this.parseTage().map(t => '<tr><td style="padding:8px 14px 8px 0; font-size:14px; font-weight:700; color:#FF5900; white-space:nowrap;">' + esc(t.wochentag) + ', ' + esc(t.datum) + ' ' + esc(t.monat) + '</td><td style="padding:8px 0; font-size:14px; color:#333333;">' + esc(t.uhrzeit) + ' · ' + esc(t.kurztitel) + '</td></tr>').join('');
+    return '<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>' + esc(this.betreff()) + '</title></head>'
+      + '<body style="margin:0; padding:0; background:#E4E5E7; font-family:Arial, Helvetica, sans-serif;">'
+      + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#E4E5E7;"><tr><td align="center" style="padding:24px 12px;">'
+      + '<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; background:#FFFFFF;">'
+      + '<tr><td style="height:6px; background:#FF5900; line-height:6px; font-size:0;">&nbsp;</td></tr>'
+      + '<tr><td style="padding:28px 32px 8px 32px;"><div style="font-size:22px; font-weight:bold; letter-spacing:-0.5px;"><span style="color:#FF5900;">mh</span><span style="color:#333333;">emmerich</span> <span style="color:#FF5900;">anwälte</span> <span style="color:#A9B0B6; font-size:14px;">frankfurt</span></div></td></tr>'
+      + '<tr><td style="padding:14px 32px 0 32px;"><div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#FF5900; font-weight:bold;">' + esc(f.kicker) + '</div>'
+      + '<div style="font-size:26px; font-weight:bold; color:#333333; text-transform:uppercase; line-height:1.15; margin-top:10px;">' + esc(f.titel1) + ' ' + esc(f.titel2) + '</div>'
+      + '<div style="height:3px; width:120px; background:#2C353D; margin:16px 0 20px 0;"></div></td></tr>'
+      + '<tr><td style="padding:0 32px;"><p style="margin:0 0 16px 0; font-size:15px; line-height:1.65; color:#333333;">' + esc(f.mailAnrede) + '</p>' + paras + '</td></tr>'
+      + (tage ? '<tr><td style="padding:6px 32px 0 32px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%; border-top:1px solid #E2E3E5; border-bottom:1px solid #E2E3E5;">' + tage + '</table></td></tr>' : '')
+      + '<tr><td style="padding:20px 32px 0 32px;"><div style="font-size:15px; font-weight:bold; color:#333333;">' + esc(f.venue) + ', ' + esc(f.stadt) + '</div><div style="font-size:13px; color:#616161; margin-top:4px;">' + esc(f.adresse) + '</div></td></tr>'
+      + '<tr><td style="padding:24px 32px 0 32px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:#FF5900; padding:14px 22px; font-size:14px; font-weight:bold; color:#FFFFFF;">' + esc(f.mailCta) + '</td></tr></table></td></tr>'
+      + '<tr><td style="padding:26px 32px 0 32px;"><div style="background:#EFBB20; padding:14px 18px; font-size:14px; font-weight:bold; color:#FFFFFF; line-height:1.4;">Klar, kantig, kompetent. Wir beraten Unternehmer. Modern seit mehr als 25 Jahren.</div></td></tr>'
+      + '<tr><td style="padding:24px 32px 28px 32px;"><p style="margin:0; font-size:15px; line-height:1.65; color:#333333;">Mit freundlichen Grüßen<br><strong>' + esc(f.pName) + '</strong><br><span style="color:#616161; font-size:13px;">' + esc(f.pFunktion) + '</span></p></td></tr>'
+      + '<tr><td style="background:#2C353D; padding:18px 32px;"><div style="font-size:11px; line-height:1.6; color:#D5D8DB;">mh anwälte Rechtsanwaltsgesellschaft mbH · Schwanthalerstraße 59 A · 60596 Frankfurt am Main</div>'
+      + '<div style="font-size:11px; line-height:1.6; color:#EFBB20;">+49 (0) 69 530875-0 · info@mhanwaelte.de · www.mhanwaelte.de</div></td></tr>'
+      + '</table></td></tr></table></body></html>';
+  }
+  sigHtml() {
+    const f = this.state.f;
+    return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, Helvetica, sans-serif;">'
+      + '<tr><td style="font-size:14px; font-weight:bold; color:#333333; padding-bottom:2px;">' + f.pName + '</td></tr>'
+      + '<tr><td style="font-size:13px; font-weight:bold; color:#FF5900; padding-bottom:10px;">' + f.pFunktion + '</td></tr>'
+      + '<tr><td style="border-top:1px solid #E2E3E5; padding-top:10px; font-size:12px; line-height:1.6; color:#616161;">mh anwälte Rechtsanwaltsgesellschaft mbH · Schwanthalerstraße 59 A · 60596 Frankfurt am Main<br>'
+      + f.pTel + ' · <a href="mailto:' + f.pMail + '" style="color:#FF5900; text-decoration:none;">' + f.pMail + '</a> · <a href="https://www.mhanwaelte.de" style="color:#FF5900; text-decoration:none;">www.mhanwaelte.de</a></td></tr></table>';
+  }
+
+  dl(blob, name) {
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+  copy(text, label) {
+    try {
+      if (navigator.clipboard) navigator.clipboard.writeText(text);
+      this.msg(label + ' liegt in der Zwischenablage.');
+    } catch (e) { this.msg('Kopieren wurde vom Browser blockiert.'); }
+  }
+  downloadTile(size) {
+    const c = document.createElement('canvas');
+    this.paintTile(c, size);
+    c.toBlob(b => { this.dl(b, 'mh-kachel-' + size + '.png'); this.msg('mh-kachel-' + size + '.png wurde heruntergeladen.'); }, 'image/png');
+  }
+  downloadLogo(kind) {
+    const c = document.createElement('canvas');
+    this.paintLogo(c, kind === 'dunkel', kind === 'quadrat');
+    c.toBlob(b => { this.dl(b, 'mh-logo-' + kind + '.png'); this.msg('mh-logo-' + kind + '.png wurde heruntergeladen.'); }, 'image/png');
+  }
+  actionsFor(tab) {
+    if (tab === 'social') {
+      const list = [
+        { id: 'tile', label: 'Aktuelles Format als PNG', primary: true },
+        { id: 'tiles', label: 'Alle vier Formate laden', secondary: true }
+      ];
+      if (this.parseSerie().length) list.push({ id: 'serie', label: 'Karussell als PNG-Serie', secondary: true });
+      list.push({ id: 'caption', label: 'Begleittext kopieren', secondary: true });
+      return list;
+    }
+    if (tab === 'mail') return [
+      { id: 'mailhtml', label: 'HTML kopieren', primary: true },
+      { id: 'mailfile', label: 'Als .html speichern', secondary: true },
+      { id: 'betreff', label: 'Betreff kopieren', secondary: true }
+    ];
+    if (tab === 'sig') return [
+      { id: 'sightml', label: 'HTML kopieren', primary: true },
+      { id: 'sigtext', label: 'Als Text kopieren', secondary: true }
+    ];
+    if (tab === 'logo') return [
+      { id: 'logohell', label: 'Wortmarke auf Weiß · PNG', primary: true },
+      { id: 'logodunkel', label: 'Fassung auf Anthrazit · PNG', secondary: true },
+      { id: 'logoquadrat', label: 'Quadratisch · PNG', secondary: true }
+    ];
+    return [{ id: 'print', label: 'Drucken / als PDF speichern', primary: true }];
+  }
+  onActionId(id) {
+    const f = this.state.f;
+    if (id === 'print') { window.print(); return; }
+    if (id === 'tile') return this.downloadTile(f.ausgabe);
+    if (id === 'tiles') { Object.keys(SIZES).forEach((s, i) => setTimeout(() => this.downloadTile(s), i * 350)); return; }
+    if (id === 'serie') {
+      const serie = this.parseSerie();
+      serie.forEach((it, i) => setTimeout(() => {
+        const c = document.createElement('canvas');
+        this.paintSerieTile(c, it, serie.length);
+        c.toBlob(b => this.dl(b, 'mh-karussell-' + (i + 1 < 10 ? '0' : '') + (i + 1) + '.png'), 'image/png');
+      }, i * 350));
+      return this.msg(serie.length + ' Kacheln werden heruntergeladen.');
+    }
+    if (id === 'caption') return this.copy(this.caption(), 'Der Begleittext');
+    if (id === 'mailhtml') return this.copy(this.mailHtml(), 'Der Quelltext der Mail');
+    if (id === 'mailfile') { this.dl(new Blob([this.mailHtml()], { type: 'text/html' }), 'mh-mail.html'); return this.msg('mh-mail.html wurde heruntergeladen.'); }
+    if (id === 'betreff') return this.copy(this.betreff(), 'Die Betreffzeile');
+    if (id === 'sightml') return this.copy(this.sigHtml(), 'Die Signatur als HTML');
+    if (id === 'sigtext') return this.copy(f.pName + '\n' + f.pFunktion + '\nmh anwälte Rechtsanwaltsgesellschaft mbH · Schwanthalerstraße 59 A · 60596 Frankfurt am Main\n' + f.pTel + ' · ' + f.pMail + ' · www.mhanwaelte.de', 'Die Signatur');
+    if (id === 'logohell') return this.downloadLogo('hell');
+    if (id === 'logodunkel') return this.downloadLogo('dunkel');
+    if (id === 'logoquadrat') return this.downloadLogo('quadrat');
+  }
+
+  renderVals() {
+    const st = this.state, f = st.f, tab = st.tab;
+    const tage = this.parseTage().map(t => Object.assign({}, t, { punkte: this.parseProgramm(t.nr) }));
+    const serie = this.parseSerie().map((it, i) => Object.assign({}, it, { ref: this.sRefs[i] }));
+    const sheetTabs = { einladung: 1, brief: 1, cert: 1, karte: 1 };
+    const pages = tab === 'einladung' ? (f.docArt === 'voll' ? 3 + tage.length : 1) : 1;
+    const pageH = tab === 'brief' ? 297 : tab === 'karte' ? 120 : 210;
+    const notes = {
+      einladung: 'Save the Date als Einzelblatt oder die vollständige Einladung mit Deckblatt, Einleitung, einer Programmseite je Tag und Logistikseite.',
+      social: 'Kacheln für LinkedIn in vier Formaten. Weiße Fläche, Orangekante, Goldlinie, dunkler Fuß – wie die Drucksachen.',
+      mail: 'Tabellenbasierte HTML-Mail mit festen Farben, damit Outlook sie unverändert darstellt.',
+      brief: 'Briefbogen DIN A4 mit Anschriftenfeld, Aktenzeichen und dunklem Fußsteg.',
+      cert: 'Teilnahmebescheinigung nach § 15 FAO, A4 quer.',
+      karte: 'Vorder- und Rückseite auf einem Bogen, 85 × 55 mm.',
+      sig: 'Vier Zeilen, kein Bildbanner. In Outlook, Apple Mail und Webmail identisch.',
+      logo: 'Wortmarke als PNG in hoher Auflösung – auf Weiß, auf Anthrazit und quadratisch fürs Profilbild.'
+    };
+    const titles = {
+      einladung: 'Einladung & Save the Date', social: 'LinkedIn-Kacheln', mail: 'E-Mails an Mandanten',
+      brief: 'Briefbogen', cert: 'Teilnahmebescheinigung', karte: 'Visitenkarte', sig: 'E-Mail-Signatur', logo: 'Logo-Dateien'
+    };
+    return {
+      tabs: TABS_DEF.map(t => ({ id: t.id, label: t.label, active: t.id === tab, idle: t.id !== tab })),
+      socialTypes: Object.keys(SOCIAL_DEF).map(k => ({ id: k, label: SOCIAL_DEF[k].label })),
+      actions: this.actionsFor(tab).map(a => ({ id: a.id, label: a.label, primary: !!a.primary, secondary: !a.primary })),
+      f: f,
+      tage: tage,
+      logistik: this.parseLogistik(),
+      terminLine: this.terminLine(),
+      faoLine: f.fao ? 'Fortbildung gem. § 15 FAO · ' + f.fao : '',
+      hasAnlagen: !!(f.anlagen && f.anlagen.trim()),
+      panelKicker: 'Vorlage',
+      panelTitle: titles[tab] || '',
+      panelNote: notes[tab] || '',
+      message: st.message,
+      saveHint: st.saved ? 'Eingaben gespeichert' : 'Eingaben werden im Browser gespeichert',
+      hasEvent: tab === 'einladung' || tab === 'cert' || tab === 'mail',
+      isEinladung: tab === 'einladung',
+      isSocial: tab === 'social',
+      isMail: tab === 'mail',
+      isBrief: tab === 'brief',
+      isCert: tab === 'cert',
+      isKarte: tab === 'karte',
+      isSig: tab === 'sig',
+      isLogo: tab === 'logo',
+      isPerson: tab === 'karte' || tab === 'sig' || tab === 'brief',
+      isSheet: !!sheetTabs[tab],
+      showSave: tab === 'einladung' && f.docArt !== 'voll',
+      showVoll: tab === 'einladung' && f.docArt === 'voll',
+      scale: st.scale,
+      sheetHeight: Math.round(pages * (pageH + 8) * this.pxPerMm * st.scale),
+      isPromptTyp: f.sTyp === 'prompt' || f.sTyp === 'projekt',
+      serieItems: serie,
+      serieCount: serie.length,
+      hasSerie: serie.length > 0,
+      captionText: this.caption(),
+      betreffFinal: this.betreff(),
+      paneRef: this.paneRef,
+      mainCanvas: this.mainCanvas, c1: this.c1, c2: this.c2, c3: this.c3, c4: this.c4,
+      l1: this.l1, l2: this.l2, l3: this.l3, mailFrame: this.mailFrame,
+      onTab: e => { const id = e.currentTarget.getAttribute('data-tab'); this.setState({ tab: id, message: '' }, () => this.measure()); },
+      onField: e => this.set(e.target.name, e.target.value),
+      onPreset: e => {
+        const key = e.target.value, p = SOCIAL_DEF[key] || SOCIAL_DEF.standpunkt;
+        const nf = Object.assign({}, this.state.f, { sTyp: key, sKicker: p.sKicker, sBig: p.sBig, sSub: p.sSub, sFl: p.sFl, sFr: p.sFr, sTags: p.sTags });
+        if (key === 'projekt') nf.sModell = 'Sprachmodell mit Dateianalyse';
+        if (key === 'prompt') nf.sModell = 'Sprachmodell mit Dateianalyse';
+        this.setState({ f: nf }, () => this.persist(nf));
+      },
+      onAction: e => this.onActionId(e.currentTarget.getAttribute('data-act')),
+      onReset: () => { this.setState({ f: { ...DEFAULTS }, message: 'Beispieldaten geladen.' }, () => this.persist(DEFAULTS)); }
+    };
+  }
+}
+</script>
+</body>
+</html>
