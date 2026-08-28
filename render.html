@@ -1,0 +1,225 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mh anwälte – Kachel-Renderer (Automatisierung)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>html,body{margin:0;padding:0;background:#fff;font-family:'Open Sans',Arial,sans-serif}#hint{padding:24px;color:#616161;font-size:14px}</style>
+</head>
+<body>
+<div id="hint">mh anwälte – Kachel-Renderer für die Automatisierung. Diese Seite hat keine Oberfläche; sie stellt <code>window.mhRenderTile({text, sub, format})</code> bereit.</div>
+<canvas id="mhCanvas" style="display:none"></canvas>
+<script>
+// mha tile core – extrahiert aus dem Generator, React/Babel-frei
+const ORANGE = '#FF5900', GOLD = '#EFBB20', INK = '#2C353D', TEXT = '#333333', GREY = '#616161', LIGHT = '#F8F8F8', LINE = '#CFD2D5';
+const SIZES = { '1080x1080': [1080, 1080], '1200x627': [1200, 627], '1080x1350': [1080, 1350], '1080x1920': [1080, 1920] };
+const SOCIAL_DEF = {
+  standpunkt: { label: 'Standpunkt / Kernaussage', mode: 'quote', sKicker: 'STANDPUNKT', sBig: 'Eine Sanierung beginnt Monate vor dem Antrag – nicht am Tag der Zahlungsunfähigkeit.', sSub: '', sFl: 'Michael Hemmerich, LL.M.', sFr: 'mhanwaelte.de', sTags: '#Insolvenzrecht #Sanierung #Mittelstand' },
+  rechtsprechung: { label: 'Rechtsprechung', mode: 'headline', sKicker: 'RECHTSPRECHUNG', sBig: 'Sanierungsdarlehen: wann es den Darlehensgeber schützt', sSub: 'Und wann der Insolvenzverwalter es zurückfordert.', sFl: 'Zum Beitrag', sFr: 'mhanwaelte.de', sTags: '#Rechtsprechung #Insolvenzanfechtung' },
+  ratgeber: { label: 'Ratgeber / Fachbeitrag', mode: 'headline', sKicker: 'RATGEBER', sBig: 'Vermögensstatus der GmbH: Überschuldung richtig feststellen', sSub: 'Was Gerichte als Nachweis akzeptieren – und was nicht.', sFl: 'Zum Beitrag', sFr: 'mhanwaelte.de', sTags: '#GmbH #Überschuldung #Geschäftsführerhaftung' },
+  veranstaltung: { label: 'Veranstaltungshinweis', mode: 'headline', sKicker: 'SAVE THE DATE', sBig: 'Krise als Gestaltungsaufgabe', sSub: '11.–12. März 2027, Villa Kennedy, Frankfurt am Main.', sFl: 'Programm folgt', sFr: 'mhanwaelte.de', sTags: '#Veranstaltung #Sanierung #Frankfurt' },
+  zahl: { label: 'Zahl oder Frist', mode: 'number', sKicker: 'DREI WOCHEN', sBig: '3', sSub: 'Wochen bleiben Ihnen nach Eintritt der Zahlungsunfähigkeit für den Insolvenzantrag.', sFl: '§ 15a InsO', sFr: 'mhanwaelte.de', sTags: '#Antragspflicht #Geschäftsführerhaftung' },
+  personalie: { label: 'Personalie / Team', mode: 'headline', sKicker: 'IM TEAM', sBig: 'Seda Uluc', sSub: 'Rechtsanwältin, Insolvenzrecht – seit 2025 bei mh anwälte.', sFl: 'Willkommen', sFr: 'mhanwaelte.de', sTags: '#Team #Insolvenzrecht' },
+  frage: { label: 'Frage an die Leser', mode: 'quote', sKicker: 'FRAGE AN SIE', sBig: 'Wie früh holen Sie in der Krise juristischen Rat dazu?', sSub: 'Wir sammeln Erfahrungen für unsere Mandantenveranstaltung – Antworten gern in die Kommentare.', sFl: '', sFr: 'mhanwaelte.de', sTags: '#Praxisfrage #Sanierung #Mittelstand' },
+  prompt: { label: 'Prompt der Woche', mode: 'prompt', sKicker: 'PROMPT DER WOCHE · KW 35', sBig: 'Gläubigerliste aus dem Kontoauszug', sSub: 'Die Zeitangabe und das vorgegebene Tabellenformat lassen dem Modell keinen Interpretationsspielraum.', sFl: 'Getestet in der Praxis', sFr: 'mhanwaelte.de', sTags: '#KIinderKanzlei #Insolvenzrecht #Legaltech' },
+  projekt: { label: 'Projekt aus der Praxis', mode: 'projekt', sKicker: 'AUS DER PRAXIS · KW 35', sBig: 'Forderungsanmeldungen automatisch vorsortiert', sSub: 'Zwei Tage Handarbeit sind auf eine halbe Stunde Prüfung geschrumpft. Was nicht klappte: Anlagen als Scan – die mussten wir weiter selbst lesen.', sFl: 'Getestet in der Praxis', sFr: 'mhanwaelte.de', sTags: '#KIinderKanzlei #Legaltech #Kanzleipraxis' },
+  stelle: { label: 'Stellenangebot', mode: 'headline', sKicker: 'STELLENANGEBOT', sBig: 'Rechtsanwältin oder Rechtsanwalt für Insolvenzrecht', sSub: 'Frankfurt am Main, Vollzeit, ab sofort.', sFl: 'Bewerbung an info@mhanwaelte.de', sFr: 'mhanwaelte.de', sTags: '#Stellenangebot #Jobs #Frankfurt' }
+};
+const R = {
+  logo: null,
+  state: { f: {} },
+  wrap(ctx, text, maxW, allowBreak) {
+    const words = String(text || '').split(/\s+/).filter(Boolean);
+    const lines = [];
+    let cur = '';
+    const push = s => { if (s) lines.push(s); };
+    words.forEach(w => {
+      // Überlanges Einzelwort (deutsche Komposita) trennen – nur als letzte Rettung,
+      // wenn der Schriftgrad schon am Minimum ist
+      if (allowBreak !== false && ctx.measureText(w).width > maxW) {
+        push(cur); cur = '';
+        let part = '';
+        for (const ch of w) {
+          if (ctx.measureText(part + ch + '-').width > maxW && part) { push(part + '-'); part = ch; }
+          else part += ch;
+        }
+        cur = part;
+        return;
+      }
+      const test = cur ? cur + ' ' + w : w;
+      if (ctx.measureText(test).width > maxW && cur) { push(cur); cur = w; } else cur = test;
+    });
+    push(cur);
+    return lines;
+  },
+  longestWord(ctx, text) {
+    return String(text || '').split(/\s+/).filter(Boolean)
+      .reduce((m, w) => Math.max(m, ctx.measureText(w).width), 0);
+  },
+  paintTile(canvas, size) {
+    if (!canvas) return;
+    const dim = SIZES[size] || SIZES['1080x1080'];
+    const W = dim[0], H = dim[1];
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    const f = this.state.f;
+    const mode = (SOCIAL_DEF[f.sTyp] || SOCIAL_DEF.standpunkt).mode;
+    const S = Math.min(W, H);
+    const land = true; // Logo sitzt in jedem Format oben rechts, der Textblock darunter
+    const pad = Math.round(S * 0.085);
+    const footH = Math.round(Math.max(S * 0.1, H * 0.115));
+    const logoRatio = this.logo && this.logo.naturalWidth ? this.logo.naturalHeight / this.logo.naturalWidth : 0.53;
+    const logoW = Math.round(W * (land ? 0.15 : 0.24));
+    const logoH = Math.round(logoW * logoRatio);
+    const kickFs = Math.round(S * 0.028);
+    const font = (w, s) => w + ' ' + Math.round(s) + 'px "Open Sans", Arial, sans-serif';
+
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = ORANGE; ctx.fillRect(0, 0, W, Math.round(Math.max(6, S * 0.022)));
+
+    const kickY = Math.round(Math.max(S * 0.07, H * 0.055));
+    ctx.textBaseline = 'top';
+    if (ctx.letterSpacing !== undefined) ctx.letterSpacing = Math.round(S * 0.004) + 'px';
+    ctx.fillStyle = ORANGE;
+    ctx.font = font('700', kickFs);
+    ctx.fillText(String(f.sKicker || '').toUpperCase(), pad, kickY);
+    if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
+
+    // Logo: im Querformat oben rechts, sonst über dem Fußbalken
+    const logoTop = land ? kickY - Math.round(logoH * 0.25) : 0;
+    if (this.logo && this.logo.complete && this.logo.naturalWidth && land) {
+      ctx.drawImage(this.logo, W - pad - logoW, Math.max(Math.round(S * 0.03), logoTop), logoW, logoH);
+    }
+
+    const portrait = H / W > 1.15;
+    const bandH = portrait ? Math.round(H * 0.055) : 0;
+    // Textblock beginnt unter dem Logoband – dadurch steht ihm die volle Breite zur Verfügung
+    const logoBottom = Math.max(Math.round(S * 0.03), kickY - Math.round(logoH * 0.25)) + logoH;
+    const top = Math.max(kickY + Math.round(kickFs * 2.3), logoBottom + Math.round(S * 0.035));
+    const bottom = H - footH - bandH - Math.round(S * 0.05) - (land ? 0 : logoH + Math.round(S * 0.04));
+    const avail = Math.max(40, bottom - top);
+    const isQuote = mode === 'quote';
+    const barW = Math.round(S * 0.014);
+    const maxW = Math.max(Math.round(W * 0.3), W - pad * 2 - (isQuote ? Math.round(S * 0.055) : 0));
+    const goldH = Math.round(Math.max(5, S * 0.009));
+
+    let fs, lines, lh, subFs, subLines, subLh, blockH;
+    const minFs = Math.round(S * 0.032);
+    const subMaxW = W - pad * 2;
+    const startFs = Math.round(S * (mode === 'number' ? 0.34 : String(f.sBig || '').length > 90 ? 0.072 : 0.098));
+    let guard = 0;
+    for (fs = startFs; fs >= minFs && guard < 60; fs -= Math.max(2, Math.round(S * 0.004)), guard++) {
+      ctx.font = font(mode === 'number' ? '800' : '700', fs);
+      // Erst ohne Trennung umbrechen: so bleibt die Breitenprüfung wirksam
+      lines = mode === 'number' ? [String(f.sBig || '')] : this.wrap(ctx, f.sBig, maxW, false);
+      lh = Math.round(fs * (mode === 'number' ? 1.0 : 1.14));
+      const tooWide = mode !== 'number' && this.longestWord(ctx, f.sBig) > maxW;
+      subFs = Math.round(Math.min(fs * 0.52, S * 0.045));
+      ctx.font = font(mode === 'number' ? '700' : '400', subFs);
+      subLines = f.sSub ? this.wrap(ctx, f.sSub, subMaxW) : [];
+      subLh = Math.round(subFs * 1.4);
+      blockH = lines.length * lh + Math.round(S * 0.03) + goldH + Math.round(S * 0.035) + subLines.length * subLh;
+      if (blockH <= avail && !tooWide) break;
+    }
+    // Am Minimum angekommen und ein Wort ist noch zu breit: jetzt erst trennen
+    if (mode !== 'number') {
+      ctx.font = font('700', fs);
+      if (this.longestWord(ctx, f.sBig) > maxW) {
+        lines = this.wrap(ctx, f.sBig, maxW, true);
+        blockH = lines.length * lh + Math.round(S * 0.03) + goldH + Math.round(S * 0.035) + subLines.length * subLh;
+      }
+    }
+
+    // Textblock im Hochformat vertikal ausmitteln, damit keine Totfläche entsteht
+    let y = top + Math.round(Math.max(0, (avail - blockH)) * (portrait ? 0.42 : 0));
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, top - Math.round(S * 0.01), W, bottom - top + Math.round(S * 0.01));
+    ctx.clip();
+    const tx = isQuote ? pad + Math.round(S * 0.055) : pad;
+    ctx.fillStyle = mode === 'number' ? ORANGE : TEXT;
+    ctx.font = font(mode === 'number' ? '800' : '700', fs);
+    if (isQuote) {
+      ctx.fillStyle = ORANGE;
+      ctx.fillRect(pad, y + Math.round(fs * 0.14), barW, lines.length * lh - Math.round(fs * 0.24));
+      ctx.fillStyle = TEXT;
+    }
+    lines.forEach(l => { ctx.fillText(l, tx, y); y += lh; });
+    y += Math.round(S * 0.03);
+    ctx.fillStyle = GOLD; ctx.fillRect(pad, y, Math.round(S * 0.16), goldH);
+    y += goldH + Math.round(S * 0.035);
+    if (subLines.length) {
+      ctx.fillStyle = mode === 'number' ? TEXT : GREY;
+      ctx.font = font(mode === 'number' ? '700' : '400', subFs);
+      subLines.forEach(l => { ctx.fillText(l, pad, y); y += subLh; });
+    }
+    ctx.restore();
+
+    // Hochformat: Goldband über dem Fußbalken fängt die untere Fläche
+    if (portrait) {
+      ctx.fillStyle = GOLD;
+      ctx.fillRect(0, H - footH - bandH, W, bandH);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textBaseline = 'middle';
+      ctx.font = font('700', Math.round(S * 0.032));
+      ctx.fillText('Klar, kantig, kompetent.', pad, H - footH - bandH / 2);
+      ctx.textBaseline = 'top';
+    }
+    ctx.fillStyle = INK; ctx.fillRect(0, H - footH, W, footH);
+    ctx.textBaseline = 'middle';
+    ctx.font = font('700', Math.round(S * 0.03));
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(String(f.sFl || ''), pad, H - footH / 2);
+    ctx.fillStyle = GOLD;
+    ctx.textAlign = 'right';
+    ctx.fillText(String(f.sFr || ''), W - pad, H - footH / 2);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+  }
+};
+if (typeof module !== 'undefined') module.exports = { R, SIZES, SOCIAL_DEF };
+
+
+/* --- Render-Harness (React-/Babel-frei) --- */
+var _logo = new Image();
+var _logoReady = new Promise(function (res) { _logo.onload = res; _logo.onerror = res; });
+_logo.src = 'assets/mh-logo-dreizeiler.png';
+R.logo = _logo;
+
+async function _fontsReady() {
+  if (document.fonts && document.fonts.ready) {
+    try {
+      await document.fonts.load('400 48px "Open Sans"');
+      await document.fonts.load('700 48px "Open Sans"');
+      await document.fonts.load('800 48px "Open Sans"');
+      await document.fonts.ready;
+    } catch (e) {}
+  }
+}
+
+window.mhRenderTile = async function (params) {
+  params = params || {};
+  var typ = SOCIAL_DEF[params.typ] ? params.typ : 'standpunkt';
+  var d = SOCIAL_DEF[typ];
+  R.state.f = {
+    sTyp: typ,
+    sKicker: params.kicker != null ? String(params.kicker) : d.sKicker,
+    sBig:    params.text   != null ? String(params.text)   : d.sBig,
+    sSub:    params.sub    != null ? String(params.sub)    : '',
+    sFl:     params.fl     != null ? String(params.fl)     : d.sFl,
+    sFr:     params.fr     != null ? String(params.fr)     : d.sFr,
+    ausgabe: SIZES[params.format] ? params.format : '1080x1080'
+  };
+  await _logoReady;
+  await _fontsReady();
+  var c = document.createElement('canvas');
+  R.paintTile(c, R.state.f.ausgabe);
+  return c.toDataURL('image/png');
+};
+window.__mhRenderReady = true;
+</script>
+</body>
+</html>
